@@ -26,6 +26,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -37,9 +38,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @Autonomous(name="Autonomous", group="4507")  // @TeleOp(...) is the other common choice
-
+@Disabled
 public class Autonomous4507 extends LinearOpMode {
 
+    DcMotorController dcmc;
     //Motors
     DcMotor lDrive;
     DcMotor rDrive;
@@ -227,23 +229,49 @@ public class Autonomous4507 extends LinearOpMode {
     public void driveTurn (int degrees, double speed, long delay) throws InterruptedException {
         int currentHeading;
         int startHeading;
+        int desiredHeading;
         int gyroError;
         boolean exitTurn = false;
+
+        if (blue) {
+            degrees = degrees * -1;
+        }
 
         lDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
+        desiredHeading = gyro.getHeading();
         startHeading = gyro.getHeading();
+        gyroError = desiredHeading - gyro.getHeading();
+        if (gyroError > 180) {
+            gyroError = 360 - gyroError;
+        }
+        if (gyroError < -180) {
+            gyroError = 360 + gyroError;
+        }
+
+        desiredHeading = gyro.getHeading() + degrees;
+        if (desiredHeading > 360) {
+            desiredHeading = desiredHeading - 360;
+        }
+        if (desiredHeading < 0) {
+            desiredHeading = desiredHeading + 360;
+        }
 
         while (!exitTurn) {
-            currentHeading = gyro.getHeading();
-            gyroError = startHeading - currentHeading;
-            if (gyroError < 0) {
-
+            gyroError = gyro.getHeading() - desiredHeading;
+            if (gyroError > 180) {
+                gyroError = 360 - gyroError;
             }
+            if (gyroError < -180) {
+                gyroError = 360 + gyroError;
+            }
+            if (gyroError == 0) {
+                exitTurn = true;
+            }
+            idle();
         }
         sleep(delay);
-
     }
 
     /**

@@ -34,8 +34,12 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -51,45 +55,45 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 
 @TeleOp(name="Teleop", group="4507")  // @Autonomous(...) is the other common choice
-@Disabled
-public class TeleOp4507 extends LinearOpMode {
+//@Disabled
+public class TeleOp4507 extends OpMode {
 
-    /* Declare OpMode members. */
-    private ElapsedTime runtime = new ElapsedTime();
-    // DcMotor leftMotor = null;
-    // DcMotor rightMotor = null;
+    DcMotor lDrive;
+    DcMotor rDrive;
+    DcMotor sweeper;
+    boolean sweeperOn = false;
 
     @Override
-    public void runOpMode() throws InterruptedException {
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
+    public void init() {
+        lDrive = hardwareMap.dcMotor.get("lD");
+        rDrive = hardwareMap.dcMotor.get("rD");
+        sweeper = hardwareMap.dcMotor.get("sweep");
+        lDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        lDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
 
-        /* eg: Initialize the hardware variables. Note that the strings used here as parameters
-         * to 'get' must correspond to the names assigned during the robot configuration
-         * step (using the FTC Robot Controller app on the phone).
-         */
-        // leftMotor  = hardwareMap.dcMotor.get("left motor");
-        // rightMotor = hardwareMap.dcMotor.get("right motor");
+    @Override
+    public void loop() {
+        double lSP = gamepad1.left_stick_y;
+        double rSP = gamepad1.right_stick_y;
 
-        // eg: Set the drive motor directions:
-        // "Reverse" the motor that runs backwards when connected directly to the battery
-        // leftMotor.setDirection(DcMotor.Direction.FORWARD); // Set to REVERSE if using AndyMark motors
-        // rightMotor.setDirection(DcMotor.Direction.REVERSE);// Set to FORWARD if using AndyMark motors
 
-        // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-        runtime.reset();
+        lSP = Range.clip(lSP, -1.0, 1.0);
+        rSP = Range.clip(rSP, -1.0, 1.0);
 
-        // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
-            telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.update();
+        if (gamepad2.a) {
+            sweeperOn = true;
+        } else if (gamepad2.b) {
+            sweeperOn = false;
+        }
 
-            // eg: Run wheels in tank mode (note: The joystick goes negative when pushed forwards)
-            // leftMotor.setPower(-gamepad1.left_stick_y);
-            // rightMotor.setPower(-gamepad1.right_stick_y);
-
-            idle(); // Always call idle() at the bottom of your while(opModeIsActive()) loop
+        lDrive.setPower(lSP);
+        rDrive.setPower(rSP);
+        if (sweeperOn) {
+            sweeper.setPower(1.0);
+        } else if (!sweeperOn) {
+            sweeper.setPower(0.0);
         }
     }
 }
