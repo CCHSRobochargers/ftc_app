@@ -36,8 +36,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -61,6 +64,11 @@ public class TeleOp4507 extends OpMode {
     DcMotor lDrive;
     DcMotor rDrive;
     DcMotor sweeper;
+//    DcMotor kicker;
+    Servo beaconIn;
+    Servo beaconOut;
+    UltrasonicSensor bUltra;
+    ColorSensor bColor;
     boolean sweeperOn = false;
 
     @Override
@@ -68,9 +76,17 @@ public class TeleOp4507 extends OpMode {
         lDrive = hardwareMap.dcMotor.get("lD");
         rDrive = hardwareMap.dcMotor.get("rD");
         sweeper = hardwareMap.dcMotor.get("sweep");
+//        kicker = hardwareMap.dcMotor.get("kick");
         lDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         lDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        kicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        beaconIn = hardwareMap.servo.get("bI");
+        beaconOut = hardwareMap.servo.get("bO");
+        beaconIn.setPosition(.23);
+        beaconOut.setPosition(.97);
+        bUltra = hardwareMap.ultrasonicSensor.get("bU");
+        bColor = hardwareMap.colorSensor.get("bC");
     }
 
     @Override
@@ -95,5 +111,24 @@ public class TeleOp4507 extends OpMode {
         } else if (!sweeperOn) {
             sweeper.setPower(0.0);
         }
+
+//        if (gamepad2.x) {
+//            kicker
+//        }
+
+        if (gamepad1.dpad_up) {
+            beaconIn.setPosition(Range.clip(beaconIn.getPosition() + 0.01, 0.00, 1.00));
+        } else if (gamepad1.dpad_down) {
+            beaconIn.setPosition(Range.clip(beaconIn.getPosition() - 0.01, 0.00, 1.00));
+        }
+
+        if (gamepad2.dpad_up) {
+            beaconOut.setPosition(Range.clip(beaconOut.getPosition() + 0.01, 0.00, 1.00));
+        } else if (gamepad2.dpad_down) {
+            beaconOut.setPosition(Range.clip(beaconOut.getPosition() - 0.01, 0.00, 1.00));
+        }
+        telemetry.addData("in", beaconIn.getPosition());
+        telemetry.addData("out", beaconOut.getPosition());
+        updateTelemetry(telemetry);
     }
 }

@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+
 /**
  * Created by 4507 Robocahrgers on 9/10/16.
  */
@@ -41,10 +42,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 @Disabled
 public class Autonomous4507 extends LinearOpMode {
 
-    DcMotorController dcmc;
-    //Motors
-    DcMotor lDrive;
-    DcMotor rDrive;
+    // DcMotorController
+    DcMotorController dtCtlr;
     // Servos
     Servo beaconPinion;
     Servo beaconPusher;
@@ -76,6 +75,7 @@ public class Autonomous4507 extends LinearOpMode {
     boolean straightTile;
     boolean beaconY;
     boolean beaconN;
+    boolean endMove = false;
 
     double move0a;
     double move0b;
@@ -104,11 +104,10 @@ public class Autonomous4507 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        // DcMotors
-        lDrive = hardwareMap.dcMotor.get("lD");
-        rDrive = hardwareMap.dcMotor.get("rD");
-        lDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        // DcMotorControllers - 1 = left
+        dtCtlr = hardwareMap.dcMotorController.get("dtCtlr");
+        dtCtlr.setMotorMode(1, DcMotor.RunMode.RUN_TO_POSITION);
+        dtCtlr.setMotorMode(2, DcMotor.RunMode.RUN_TO_POSITION);
         // Servos
         beaconPinion = hardwareMap.servo.get("bPi");
         beaconPusher = hardwareMap.servo.get("bPu");
@@ -206,22 +205,21 @@ public class Autonomous4507 extends LinearOpMode {
         int lTarget;
         int rTarget;
 
-        lTarget = lDrive.getCurrentPosition() + (int)(inches * (countsPerYard / 36.0));
-        rTarget = rDrive.getCurrentPosition() + (int)(inches * (countsPerYard / 36.0));
+        lTarget = dtCtlr.getMotorCurrentPosition(1) + (int)(inches * (countsPerYard / 36.0));
+        rTarget = dtCtlr.getMotorCurrentPosition(2) + (int)(inches * (countsPerYard / 36.0));
 
-        lDrive.setTargetPosition(lTarget);
-        rDrive.setTargetPosition(rTarget);
 
-        lDrive.setPower(speed);
-        rDrive.setPower(speed);
 
-        while (!lDrive.isBusy() || !rDrive.isBusy()) {
-            // Empty While loop runs until motors start
-        }
-
-        while (lDrive.isBusy() || rDrive.isBusy()) {
-            // Empty While loop runs until motors stop
-        }
+//        lDrive.setPower(speed);
+//        rDrive.setPower(speed);
+//
+//        while (!lDrive.isBusy() || !rDrive.isBusy()) {
+//            // Empty While loop runs until motors start
+//        }
+//
+//        while (lDrive.isBusy() || rDrive.isBusy()) {
+//            // Empty While loop runs until motors stop
+//        }
 
         sleep(delayMillis);
     }
@@ -237,8 +235,8 @@ public class Autonomous4507 extends LinearOpMode {
             degrees = degrees * -1;
         }
 
-        lDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        lDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        rDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         desiredHeading = gyro.getHeading();
         startHeading = gyro.getHeading();
@@ -288,6 +286,38 @@ public class Autonomous4507 extends LinearOpMode {
         while (beaconU.getUltrasonicLevel() > beaconDist) {
             beaconPinion.setPosition(1.0);
         }
+
+    }
+
+    public void setMotorPosition (int port, int lTarget, int rTarget, double speed) throws InterruptedException {
+        long preTime;
+        int preEncoderPos = dtCtlr.getMotorCurrentPosition(1);
+        int speedUpDist;
+        dtCtlr.setMotorTargetPosition(1, lTarget);
+        dtCtlr.setMotorTargetPosition(2, rTarget);
+
+        for(int c = 0; c < speed * 100; c++) {
+            dtCtlr.setMotorPower(1, (double)c / 100.0);
+            dtCtlr.setMotorPower(2, (double)c / 100.0);
+            preTime = System.currentTimeMillis();
+            while (preTime + 1 < System.currentTimeMillis() || endMove) {
+                idle();
+            }
+        }
+        speedUpDist = dtCtlr.getMotorCurrentPosition(1) - preEncoderPos;
+        while (dtCtlr.getMotorTargetPosition(1) - speedUpDist > dtCtlr.getMotorCurrentPosition(1) || endMove) {
+            idle();
+        }
+        for(int c = (int)speed * 100; c <= 0; c--) {
+            dtCtlr.setMotorPower(1, (double)c / 100.0);
+            dtCtlr.setMotorPower(2, (double)c / 100.0);
+            preTime = System.currentTimeMillis();
+            while (preTime + 1 < System.currentTimeMillis() || endMove) {
+                idle();
+            }
+        }
+
+
 
     }
 
