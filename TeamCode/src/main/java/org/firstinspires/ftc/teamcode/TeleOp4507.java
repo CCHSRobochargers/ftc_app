@@ -61,32 +61,20 @@ import com.qualcomm.robotcore.util.Range;
 //@Disabled
 public class TeleOp4507 extends OpMode {
 
-    DcMotor lDrive;
-    DcMotor rDrive;
-    DcMotor sweeper;
-//    DcMotor kicker;
-    Servo beaconIn;
-    Servo beaconOut;
-    UltrasonicSensor bUltra;
-    ColorSensor bColor;
-    boolean sweeperOn = false;
-
+    DcMotor l1;
+    DcMotor l2;
+    DcMotor r1;
+    DcMotor r2;
+//
     @Override
     public void init() {
-        lDrive = hardwareMap.dcMotor.get("lD");
-        rDrive = hardwareMap.dcMotor.get("rD");
-        sweeper = hardwareMap.dcMotor.get("sweep");
-//        kicker = hardwareMap.dcMotor.get("kick");
-        lDrive.setDirection(DcMotorSimple.Direction.REVERSE);
-        lDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        kicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        beaconIn = hardwareMap.servo.get("bI");
-        beaconOut = hardwareMap.servo.get("bO");
-        beaconIn.setPosition(.23);
-        beaconOut.setPosition(.97);
-        bUltra = hardwareMap.ultrasonicSensor.get("bU");
-        bColor = hardwareMap.colorSensor.get("bC");
+        l1 = hardwareMap.dcMotor.get("l1");
+        l1.setDirection(DcMotorSimple.Direction.REVERSE);
+        l2 = hardwareMap.dcMotor.get("l2");
+        l2.setDirection(DcMotorSimple.Direction.REVERSE);
+        r1 = hardwareMap.dcMotor.get("r1");
+        r2 = hardwareMap.dcMotor.get("r2");
+//        r2.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     @Override
@@ -98,37 +86,32 @@ public class TeleOp4507 extends OpMode {
         lSP = Range.clip(lSP, -1.0, 1.0);
         rSP = Range.clip(rSP, -1.0, 1.0);
 
-        if (gamepad2.a) {
-            sweeperOn = true;
-        } else if (gamepad2.b) {
-            sweeperOn = false;
+        if (gamepad1.dpad_up) {
+            lSP = 0.08;
+            rSP = 0.08;
+        } else if (gamepad1.dpad_down) {
+            lSP = -0.08;
+            rSP = -0.08;
         }
 
-        lDrive.setPower(lSP);
-        rDrive.setPower(rSP);
-        if (sweeperOn) {
-            sweeper.setPower(1.0);
-        } else if (!sweeperOn) {
-            sweeper.setPower(0.0);
-        }
-
-//        if (gamepad2.x) {
-//            kicker
+//        if (gamepad2.a) {
+//            sweeperOn = true;
+//        } else if (gamepad2.b) {
+//            sweeperOn = false;
 //        }
 
-        if (gamepad1.dpad_up) {
-            beaconIn.setPosition(Range.clip(beaconIn.getPosition() + 0.01, 0.00, 1.00));
-        } else if (gamepad1.dpad_down) {
-            beaconIn.setPosition(Range.clip(beaconIn.getPosition() - 0.01, 0.00, 1.00));
-        }
+        l1.setPower(lSP);
+        l2.setPower(lSP);
+        r1.setPower(rSP);
+        r2.setPower(rSP);
+//        if (sweeperOn) {
+//            sweeper.setPower(1.0);
+//        } else if (!sweeperOn) {
+//            sweeper.setPower(0.0);
+//        }
 
-        if (gamepad2.dpad_up) {
-            beaconOut.setPosition(Range.clip(beaconOut.getPosition() + 0.01, 0.00, 1.00));
-        } else if (gamepad2.dpad_down) {
-            beaconOut.setPosition(Range.clip(beaconOut.getPosition() - 0.01, 0.00, 1.00));
-        }
-        telemetry.addData("in", beaconIn.getPosition());
-        telemetry.addData("out", beaconOut.getPosition());
+        telemetry.addData("left1", l1.getCurrentPosition());
+        telemetry.addData("right1", r1.getCurrentPosition());
         updateTelemetry(telemetry);
     }
 }

@@ -46,9 +46,9 @@ public class Autonomous4507 extends LinearOpMode {
 
     // DcMotorController
     DcMotor l1;
-    DcMotor l2;
+//    DcMotor l2;
     DcMotor r1;
-    DcMotor r2;
+//    DcMotor r2;
     // Servos
 //    Servo beaconPinion;
 //    Servo beaconPusher;
@@ -65,7 +65,7 @@ public class Autonomous4507 extends LinearOpMode {
 //    ElapsedTime elapsedTime;
 
     // Global State Vaiables
-    double countsPerYard = 30000.0;
+    double countsPerYard = 2867.0;
     double countsPer360 = 30000.0;
     double fastSpeed;
     double mediumSpeed;
@@ -116,10 +116,12 @@ public class Autonomous4507 extends LinearOpMode {
         // DcMotorControllers
         l1 = hardwareMap.dcMotor.get("l1");
 //        l1.setDirection(DcMotorSimple.Direction.REVERSE);
-        l2 = hardwareMap.dcMotor.get("l2");
+//        l2 = hardwareMap.dcMotor.get("l2");
         r1 = hardwareMap.dcMotor.get("r1");
-        r2 = hardwareMap.dcMotor.get("r2");
+        r1.setDirection(DcMotorSimple.Direction.REVERSE);
+//        r2 = hardwareMap.dcMotor.get("r2");
 //        r2.setDirection(DcMotorSimple.Direction.REVERSE);
+
         // Servos
 //        beaconPinion = hardwareMap.servo.get("bPi");
 //        beaconPusher = hardwareMap.servo.get("bPu");
@@ -205,7 +207,7 @@ public class Autonomous4507 extends LinearOpMode {
 //            driveStraight(move6, fastSpeed, fastSpDelay);
 //        }
         driveStraight(12, 1.0, 5000);
-        driveTurn(90, 5000);
+//        driveTurn(90, 5000);
         driveStraight(12, 1.0, 5000);
 
 
@@ -227,11 +229,24 @@ public class Autonomous4507 extends LinearOpMode {
     public void driveStraight(double inches, double speed, long delayMillis) throws InterruptedException {
         int lTarget;
         int rTarget;
+//        int pre = l1.getCurrentPosition() * -1;
 
-        lTarget = l1.getCurrentPosition() + (int)(inches * (countsPerYard / 36.0));
-        rTarget = r1.getCurrentPosition() + (int)(inches * (countsPerYard / 36.0));
+        lTarget = l1.getCurrentPosition() * -1 + (int)(inches * (countsPerYard / 36.0));
+        rTarget = r1.getCurrentPosition() * -1 + (int)(inches * (countsPerYard / 36.0));
 
-        setMotorPosition(lTarget, rTarget, speed);
+        l1.setTargetPosition(lTarget);
+        r1.setTargetPosition(rTarget);
+
+        l1.setPower(speed);
+//        l2.setPower(speed);
+        r1.setPower(speed);
+//        r2.setPower(speed);
+
+        while (l1.isBusy() && r1.isBusy()) {
+            idle();
+        }
+
+//        setMotorPosition(lTarget, rTarget, speed);
         sleep(delayMillis);
     }
 
@@ -276,9 +291,9 @@ public class Autonomous4507 extends LinearOpMode {
                 exitTurn = true;
             }
             l1.setPower(Range.clip(0 - (gyroError * 0.05), -1.0, 1.0));
-            l2.setPower(Range.clip(0 - (gyroError * 0.05), -1.0, 1.0));
+//            l2.setPower(Range.clip(0 - (gyroError * 0.05), -1.0, 1.0));
             r1.setPower(Range.clip(0 + (gyroError * 0.05), -1.0, 1.0));
-            r2.setPower(Range.clip(0 + (gyroError * 0.05), -1.0, 1.0));
+//            r2.setPower(Range.clip(0 + (gyroError * 0.05), -1.0, 1.0));
             idle();
             sleep(delay);
         }
@@ -310,11 +325,14 @@ public class Autonomous4507 extends LinearOpMode {
             direction = -1;
         }
         for(int c = 0; c < (int)speed * 100; c++) {
+            if (c < 6) {
+                c = 6;
+            }
             b4EncoderPos = l1.getCurrentPosition();
             l1.setPower((double)c / 100.0 * direction);
-            l2.setPower((double)c / 100.0 * direction);
+//            l2.setPower((double)c / 100.0 * direction);
             r1.setPower((double)c / 100.0 * direction);
-            r2.setPower((double)c / 100.0 * direction);
+//            r2.setPower((double)c / 100.0 * direction);
             while (l1.getCurrentPosition() < b4EncoderPos + speedToCounts[c]) {
                 idle();
             }
@@ -324,11 +342,14 @@ public class Autonomous4507 extends LinearOpMode {
             idle();
         }
         for(int c = (int)speed * 100; c <= 0; c--) {
+            if (c < 6) {
+                c = 0;
+            }
             b4EncoderPos = l1.getCurrentPosition();
             l1.setPower((double)c / 100.0 * direction);
-            l2.setPower((double)c / 100.0 * direction);
+//            l2.setPower((double)c / 100.0 * direction);
             r1.setPower((double)c / 100.0 * direction);
-            r2.setPower((double)c / 100.0 * direction);
+//            r2.setPower((double)c / 100.0 * direction);
             while (l1.getCurrentPosition() < b4EncoderPos + speedToCounts[c]) {
                 idle();
             }
