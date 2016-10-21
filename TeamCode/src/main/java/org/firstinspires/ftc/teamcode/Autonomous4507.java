@@ -21,18 +21,19 @@
  */
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
+
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.UltrasonicSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
@@ -44,19 +45,33 @@ import com.qualcomm.robotcore.util.Range;
 //@Disabled
 public class Autonomous4507 extends LinearOpMode {
 
-    // DcMotorController
-    DcMotor l1;
-//    DcMotor l2;
-    DcMotor r1;
-//    DcMotor r2;
+    // TODO: Need to test everything new
+    // TODO: (Which is practically everything)
+    // TODO: Look and fix code at other "TODO:" statements
+
+    // Device Interface Module
+    DeviceInterfaceModule dim;
+    final int BLUE_LED_CHANNEL = 0;
+    final int RED_LED_CHANNEL = 1;
+    // DcMotor
+    DcMotor leftDrive;
+    DcMotor rightDrive;
+    DcMotor kicker;
+    DcMotor sweeper;
     // Servos
-//    Servo beaconPinion;
-//    Servo beaconPusher;
+    CRServo beaconPusher;
+    Servo rangeRotater;
 //    // Sensors
-    GyroSensor gyro;
-//    ColorSensor bColor;
-//    ColorSensor fColor;
-//    UltrasonicSensor beaconU;
+    ModernRoboticsI2cGyro gyro;
+    ColorSensor bColor;
+    float beaconHsvValues[] = {0F,0F,0F};
+    ColorSensor fColorf;
+    float frontFloorHsvValues[] = {0F,0F,0F};
+    ColorSensor fColorb;
+    float backFloorHsvValues[] = {0F,0F,0F};
+    ModernRoboticsI2cRangeSensor frontRotatingRange;
+    public static final I2cAddr NEW_I2C_ADDRESS_FOR_RANGE = I2cAddr.create8bit(0x2A);
+    ModernRoboticsI2cRangeSensor backRange;
 //    //Switches
 //    DigitalChannel tileSw;
 //    DigitalChannel colorSw;
@@ -65,17 +80,13 @@ public class Autonomous4507 extends LinearOpMode {
 //    ElapsedTime elapsedTime;
 
     // Global State Vaiables
-    double countsPerYard = 2867.0;
-    double countsPer360 = 30000.0;
+    int countsPerYard = 2867;
+    int countsPer4Donuts = 30000;
     double fastSpeed;
     double mediumSpeed;
     double slowSpeed;
     long fastSpDelay;
     long slowSpDelay;
-    int speedToCounts[] = {0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5,
-        5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8,
-        8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9};
 
     // These variables are for autonomous.
     boolean red;
@@ -113,25 +124,34 @@ public class Autonomous4507 extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        // DcMotorControllers
-        l1 = hardwareMap.dcMotor.get("l1");
-//        l1.setDirection(DcMotorSimple.Direction.REVERSE);
-//        l2 = hardwareMap.dcMotor.get("l2");
-        r1 = hardwareMap.dcMotor.get("r1");
-        r1.setDirection(DcMotorSimple.Direction.REVERSE);
-//        r2 = hardwareMap.dcMotor.get("r2");
-//        r2.setDirection(DcMotorSimple.Direction.REVERSE);
-
+        // Device Interface Module
+        dim = hardwareMap.deviceInterfaceModule.get("dim");
+        dim.setLED(RED_LED_CHANNEL, true);
+        dim.setLED(BLUE_LED_CHANNEL, false);
+        // DcMotor
+        leftDrive = hardwareMap.dcMotor.get("l1");
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive = hardwareMap.dcMotor.get("r1");
+        rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        kicker = hardwareMap.dcMotor.get("kick");
+        kicker.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sweeper = hardwareMap.dcMotor.get("sweep");
+        sweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Servos
-//        beaconPinion = hardwareMap.servo.get("bPi");
-//        beaconPusher = hardwareMap.servo.get("bPu");
-//        beaconPinion.setPosition(0.5);
-//        beaconPusher.setPosition(0.5);
+        beaconPusher = hardwareMap.crservo.get("bPu");
+        beaconPusher.setPower(0.0);
+        rangeRotater = hardwareMap.servo.get("rR");
+        rangeRotater.setPosition(0.5);
 //        // Sensors
-        gyro = hardwareMap.gyroSensor.get("gyro");
-//        bColor = hardwareMap.colorSensor.get("bC");
-//        fColor = hardwareMap.colorSensor.get("fC");
-//        beaconU = hardwareMap.ultrasonicSensor.get("bU");
+        gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
+        bColor = hardwareMap.colorSensor.get("bC");
+        fColorf = hardwareMap.colorSensor.get("cFF");
+        fColorb = hardwareMap.colorSensor.get("cFB");
+        frontRotatingRange = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "fR");
+        frontRotatingRange.setI2cAddress(NEW_I2C_ADDRESS_FOR_RANGE); //TODO: Find i2c Address to change it
+//                                                                     TODO: Fixed???
+        backRange = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "bR");
 //        //Switches
 //        tileSw = hardwareMap.digitalChannel.get("tSw");
 //        colorSw = hardwareMap.digitalChannel.get("cSw");
@@ -160,29 +180,17 @@ public class Autonomous4507 extends LinearOpMode {
 //        // Elapsed Time
 //        elapsedTime = new ElapsedTime();
         gyro.calibrate();
+        while (gyro.isCalibrating() && !isStarted()) {
+            idle();
+        }
+        if (!gyro.isCalibrating()) {
+            dim.setLED(RED_LED_CHANNEL, false);
+            dim.setLED(BLUE_LED_CHANNEL, true);
+        }
 
         // Wait for the robot to start
         waitForStart();
 
-        /**
-         * Moves and Descriptions
-         * 1.
-         *
-         * 2.
-         *
-         * 3.
-         *
-         * 4.
-         *
-         * 5.
-         *
-         * 6.
-         *
-         * 7.
-         *
-         * 8.
-         *
-         */
 
 //        if (straightTile) {
 //            driveStraight(move1a + move1b, fastSpeed, fastSpDelay);
@@ -206,9 +214,24 @@ public class Autonomous4507 extends LinearOpMode {
 //            driveTurn(turn3, mediumSpeed, slowSpDelay);
 //            driveStraight(move6, fastSpeed, fastSpDelay);
 //        }
-        driveStraight(12, 1.0, 5000);
-//        driveTurn(90, 5000);
-        driveStraight(12, 1.0, 5000);
+
+        while (gyro.isCalibrating() && opModeIsActive()) {
+            idle();
+        }
+        if (!gyro.isCalibrating()) {
+            dim.setLED(RED_LED_CHANNEL, false);
+            dim.setLED(BLUE_LED_CHANNEL, true);
+        }
+        sweep(true);
+        driveStraight(8, 1.0, 1000);
+        shoot(2);
+        driveTurn(45, .75, 1000);
+        driveStraight(32, 1.0, 1000);
+        driveTurn(45, 0.75, 1000);
+        driveStraight(22, 1.0, 1000);
+        driveTurn(-90, 0.75, 1000);
+        driveStraight(60, 1.0, 1000);
+        sweep(false);
 
 
 
@@ -223,45 +246,79 @@ public class Autonomous4507 extends LinearOpMode {
      * @param inches is how far to go
      * @param speed is how fast to go
      * @param delayMillis is how long to delay
-     * @throws InterruptedException
+     * @throws InterruptedException allows the sleep() method to be used
      */
 
     public void driveStraight(double inches, double speed, long delayMillis) throws InterruptedException {
-        int lTarget;
-        int rTarget;
-//        int pre = l1.getCurrentPosition() * -1;
+        int lTarget = leftDrive.getCurrentPosition() - (int)(-inches * (countsPerYard / 36.0));
+        int rTarget = rightDrive.getCurrentPosition() - (int)(-inches * (countsPerYard / 36.0));
 
-        lTarget = l1.getCurrentPosition() * -1 + (int)(inches * (countsPerYard / 36.0));
-        rTarget = r1.getCurrentPosition() * -1 + (int)(inches * (countsPerYard / 36.0));
+        leftDrive.setTargetPosition(lTarget);
+        rightDrive.setTargetPosition(rTarget);
 
-        l1.setTargetPosition(lTarget);
-        r1.setTargetPosition(rTarget);
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
 
-        l1.setPower(speed);
-//        l2.setPower(speed);
-        r1.setPower(speed);
-//        r2.setPower(speed);
-
-        while (l1.isBusy() && r1.isBusy()) {
+        while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive()) {
             idle();
         }
 
-//        setMotorPosition(lTarget, rTarget, speed);
         sleep(delayMillis);
     }
 
-    public void driveTurn (int degrees, long delay) throws InterruptedException {
-        int currentHeading;
-        int startHeading;
-        int desiredHeading;
-        int gyroError;
-        boolean exitTurn = false;
+    /**
+     *
+     * @param degrees is how many degrees to turn; when negated turns clockwise, and vice versa
+     * @param speed is how fast to turn
+     * @param delayMillis is how long to delay
+     * @throws InterruptedException allows the sleep() method to be used
+     */
 
+    public void driveTurn(int degrees, double speed, long delayMillis) throws InterruptedException {
         if (blue) {
             degrees = degrees * -1;
         }
 
-        startHeading = gyro.getHeading();
+        driveTurnWithEncoders(degrees, speed);
+        driveTurnWithGyro(degrees);
+
+        sleep(delayMillis);
+    }
+
+    /**
+     *
+     * @param degrees is how many degrees to turn; when negated turns clockwise, and vice versa
+     * @param speed is how fast to turn
+     */
+
+    public void driveTurnWithEncoders(int degrees, double speed) {
+        int lTarget = leftDrive.getCurrentPosition() + (degrees * (countsPer4Donuts / 1440));
+        int rTarget = rightDrive.getCurrentPosition() - (degrees * (countsPer4Donuts / 1440));
+
+        leftDrive.setTargetPosition(lTarget);
+        rightDrive.setTargetPosition(rTarget);
+
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
+
+        while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive()) {
+            idle();
+        }
+    }
+
+    /**
+     *
+     * @param degrees is how many degrees to turn; when negated turns clockwise, and vice versa
+     */
+
+    public void driveTurnWithGyro (int degrees) {
+        int desiredHeading;
+        int gyroError;
+        boolean exitTurn = false;
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
         desiredHeading = gyro.getHeading() + degrees;
         if (desiredHeading > 360) {
             desiredHeading = desiredHeading - 360;
@@ -269,17 +326,8 @@ public class Autonomous4507 extends LinearOpMode {
         if (desiredHeading < 0) {
             desiredHeading = desiredHeading + 360;
         }
-        gyroError = desiredHeading - gyro.getHeading();
-        if (gyroError > 180) {
-            gyroError = 360 - gyroError;
-        }
-        if (gyroError < -180) {
-            gyroError = 360 + gyroError;
-        }
 
-
-
-        while (!exitTurn) {
+        while (!exitTurn && opModeIsActive()) {
             gyroError = gyro.getHeading() - desiredHeading;
             if (gyroError > 180) {
                 gyroError = 360 - gyroError;
@@ -290,70 +338,96 @@ public class Autonomous4507 extends LinearOpMode {
             if (gyroError == 0) {
                 exitTurn = true;
             }
-            l1.setPower(Range.clip(0 - (gyroError * 0.05), -1.0, 1.0));
-//            l2.setPower(Range.clip(0 - (gyroError * 0.05), -1.0, 1.0));
-            r1.setPower(Range.clip(0 + (gyroError * 0.05), -1.0, 1.0));
-//            r2.setPower(Range.clip(0 + (gyroError * 0.05), -1.0, 1.0));
+            leftDrive.setPower(Range.clip(0 - (gyroError * 0.03), -0.25, 0.25));
+            rightDrive.setPower(Range.clip(0 + (gyroError * 0.03), -0.25, 0.25));
             idle();
-            sleep(delay);
+        }
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
+
+    /**
+     * TODO: This is going to be an absolute pain in the butt
+     * @param speed is the speed to go
+     * @param colorRed is whether or not we are looking for red
+     * @param desiredDistAwayInInches is the distance we want to be from the wall when we attempt to press the button
+     */
+
+    public void beacon(double speed, boolean colorRed, int desiredDistAwayInInches) {
+        boolean frontLooks = false;
+        boolean backLooks = false;
+        boolean stop = false;
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        // TODO: Need to figure out which color is which :
+        if (!colorRed) {
+            speed = -speed;
+            backLooks = true;
+        } else if (colorRed) {
+            frontLooks = true;
+        }
+
+        rangeRotater.setPosition(0.5);
+
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
+
+        while (!stop && opModeIsActive()) {
+
+            if (backLooks) {
+                Color.RGBToHSV(fColorb.red(), fColorb.green(), fColorb.blue(), backFloorHsvValues);
+                if (backFloorHsvValues[0] >= 69.0) {
+                    leftDrive.setPower(0.0);
+                    rightDrive.setPower(0.0);
+                }
+            }
         }
     }
 
     /**
      *
-     * @param shooterSpeed
-     * @param moverSpeed
+     * @param times is the number of times to shoot
      */
 
-    public void runUmbrella (double shooterSpeed, double moverSpeed) {
-
+    public void shoot(int times) {
+        for (int c = 0; c < times; c++) {
+            kick();
+            index();
+        }
     }
 
-//    public void pushButton () {
-//        while (beaconU.getUltrasonicLevel() > beaconDist) {
-//            beaconPinion.setPosition(1.0);
-//        }
-//
-//    }
+    /**
+     * kicks a particle once
+     */
 
-    public void setMotorPosition (int lTarget, int rTarget, double speed) throws InterruptedException {
-        int preEncoderPos = l1.getCurrentPosition();
-        int b4EncoderPos;
-        int speedUpDist;
-        int direction = 1;
-        if (speed < 0) {
-            direction = -1;
-        }
-        for(int c = 0; c < (int)speed * 100; c++) {
-            if (c < 6) {
-                c = 6;
-            }
-            b4EncoderPos = l1.getCurrentPosition();
-            l1.setPower((double)c / 100.0 * direction);
-//            l2.setPower((double)c / 100.0 * direction);
-            r1.setPower((double)c / 100.0 * direction);
-//            r2.setPower((double)c / 100.0 * direction);
-            while (l1.getCurrentPosition() < b4EncoderPos + speedToCounts[c]) {
-                idle();
-            }
-        }
-        speedUpDist = l1.getCurrentPosition() - preEncoderPos;
-        while (lTarget - speedUpDist > l1.getCurrentPosition()) {
+    public void kick() {
+        kicker.setTargetPosition(kicker.getCurrentPosition() + 1120);
+        kicker.setPower(1.0);
+        while (kicker.isBusy() && opModeIsActive()) {
             idle();
         }
-        for(int c = (int)speed * 100; c <= 0; c--) {
-            if (c < 6) {
-                c = 0;
-            }
-            b4EncoderPos = l1.getCurrentPosition();
-            l1.setPower((double)c / 100.0 * direction);
-//            l2.setPower((double)c / 100.0 * direction);
-            r1.setPower((double)c / 100.0 * direction);
-//            r2.setPower((double)c / 100.0 * direction);
-            while (l1.getCurrentPosition() < b4EncoderPos + speedToCounts[c]) {
-                idle();
-            }
-        }
     }
 
+    /**
+     * indexes a particle once
+     */
+
+    public void index() {
+
+    }
+
+    /**
+     *
+     * @param onOff is a boolean to determine whether to stop or start the sweeper
+     */
+
+    public void sweep(boolean onOff) {
+        if (onOff) {
+            sweeper.setPower(1.0);
+        } else if (!onOff) {
+            sweeper.setPower(0.0);
+        }
+    }
 }
