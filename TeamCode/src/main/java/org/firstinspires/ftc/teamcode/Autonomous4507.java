@@ -32,9 +32,12 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
-import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 
 
 /**
@@ -50,28 +53,28 @@ public class Autonomous4507 extends LinearOpMode {
     // TODO: Look and fix code at other "TODO:" statements
 
     // Device Interface Module
-    DeviceInterfaceModule dim;
-    final int BLUE_LED_CHANNEL = 0;
-    final int RED_LED_CHANNEL = 1;
+//    DeviceInterfaceModule dim;
+//    final int BLUE_LED_CHANNEL = 0;
+//    final int RED_LED_CHANNEL = 1;
     // DcMotor
     DcMotor leftDrive;
     DcMotor rightDrive;
     DcMotor kicker;
     DcMotor sweeper;
     // Servos
-    CRServo beaconPusher;
-    Servo rangeRotater;
-//    // Sensors
+    Servo indexer;
+//    CRServo beaconPusher;
+    // Sensors
     ModernRoboticsI2cGyro gyro;
-    ColorSensor bColor;
+//    ColorSensor bColor;
     float beaconHsvValues[] = {0F,0F,0F};
-    ColorSensor fColorf;
-    float frontFloorHsvValues[] = {0F,0F,0F};
-    ColorSensor fColorb;
-    float backFloorHsvValues[] = {0F,0F,0F};
-    ModernRoboticsI2cRangeSensor frontRotatingRange;
-    public static final I2cAddr NEW_I2C_ADDRESS_FOR_RANGE = I2cAddr.create8bit(0x2A);
-    ModernRoboticsI2cRangeSensor backRange;
+//    TouchSensor beaconStopTouch;
+    TouchSensor kickStop;
+//    ColorSensor fColorf;
+//    float frontFloorHsvValues[] = {0F,0F,0F};
+//    ColorSensor fColorb;
+//    float backFloorHsvValues[] = {0F,0F,0F};
+    ModernRoboticsI2cRangeSensor range;
 //    //Switches
 //    DigitalChannel tileSw;
 //    DigitalChannel colorSw;
@@ -81,7 +84,7 @@ public class Autonomous4507 extends LinearOpMode {
 
     // Global State Vaiables
     int countsPerYard = 2867;
-    int countsPer4Donuts = 30000;
+    int countsPer4Donuts = 17000;
     double fastSpeed;
     double mediumSpeed;
     double slowSpeed;
@@ -125,33 +128,32 @@ public class Autonomous4507 extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         // Device Interface Module
-        dim = hardwareMap.deviceInterfaceModule.get("dim");
-        dim.setLED(RED_LED_CHANNEL, true);
-        dim.setLED(BLUE_LED_CHANNEL, false);
+//        dim = hardwareMap.deviceInterfaceModule.get("dim");
+//        dim.setLED(RED_LED_CHANNEL, true);
+//        dim.setLED(BLUE_LED_CHANNEL, false);
         // DcMotor
-        leftDrive = hardwareMap.dcMotor.get("l1");
+        leftDrive = hardwareMap.dcMotor.get("l");
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightDrive = hardwareMap.dcMotor.get("r1");
+        rightDrive = hardwareMap.dcMotor.get("r");
         rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         kicker = hardwareMap.dcMotor.get("kick");
-        kicker.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        kicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sweeper = hardwareMap.dcMotor.get("sweep");
         sweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Servos
-        beaconPusher = hardwareMap.crservo.get("bPu");
-        beaconPusher.setPower(0.0);
-        rangeRotater = hardwareMap.servo.get("rR");
-        rangeRotater.setPosition(0.5);
-//        // Sensors
+        indexer = hardwareMap.servo.get("ind");
+        indexer.setPosition(0.8);
+//        beaconPusher = hardwareMap.crservo.get("bPu");
+//        beaconPusher.setPower(0.0);
+        // Sensors
         gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
-        bColor = hardwareMap.colorSensor.get("bC");
-        fColorf = hardwareMap.colorSensor.get("cFF");
-        fColorb = hardwareMap.colorSensor.get("cFB");
-        frontRotatingRange = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "fR");
-        frontRotatingRange.setI2cAddress(NEW_I2C_ADDRESS_FOR_RANGE); //TODO: Find i2c Address to change it
-//                                                                     TODO: Fixed???
-        backRange = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "bR");
+//        bColor = hardwareMap.colorSensor.get("bC");
+//        fColorf = hardwareMap.colorSensor.get("cFF");
+//        fColorb = hardwareMap.colorSensor.get("cFB");
+        range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
+//        beaconStopTouch = hardwareMap.touchSensor.get("bST");
+        kickStop = hardwareMap.touchSensor.get("kT");
 //        //Switches
 //        tileSw = hardwareMap.digitalChannel.get("tSw");
 //        colorSw = hardwareMap.digitalChannel.get("cSw");
@@ -184,8 +186,8 @@ public class Autonomous4507 extends LinearOpMode {
             idle();
         }
         if (!gyro.isCalibrating()) {
-            dim.setLED(RED_LED_CHANNEL, false);
-            dim.setLED(BLUE_LED_CHANNEL, true);
+//            dim.setLED(RED_LED_CHANNEL, false);
+//            dim.setLED(BLUE_LED_CHANNEL, true);
         }
 
         // Wait for the robot to start
@@ -219,19 +221,21 @@ public class Autonomous4507 extends LinearOpMode {
             idle();
         }
         if (!gyro.isCalibrating()) {
-            dim.setLED(RED_LED_CHANNEL, false);
-            dim.setLED(BLUE_LED_CHANNEL, true);
+//            dim.setLED(RED_LED_CHANNEL, false);
+//            dim.setLED(BLUE_LED_CHANNEL, true);
         }
         sweep(true);
-        driveStraight(8, 1.0, 1000);
+        driveStraight(24, 1.0, 400);
         shoot(2);
-        driveTurn(45, .75, 1000);
-        driveStraight(32, 1.0, 1000);
+        driveTurn(45, 0.75, 100);
+        driveStraight(32, 1.0, 100);
         driveTurn(45, 0.75, 1000);
-        driveStraight(22, 1.0, 1000);
-        driveTurn(-90, 0.75, 1000);
-        driveStraight(60, 1.0, 1000);
+        driveStraight(20, 8, 1.0, 100);
+        driveTurn(90, 0.75, 100);
+//        beacon(1.0, true);
         sweep(false);
+
+
 
 
 
@@ -240,6 +244,31 @@ public class Autonomous4507 extends LinearOpMode {
 
     }
 
+
+    public void driveStraight(double approxInches, int rangeInches, double speed, long delayMillis) throws InterruptedException {
+        boolean endMove = false;
+        int lTarget = leftDrive.getCurrentPosition() - (int)(-approxInches * (countsPerYard / 36.0) - 6);
+        int rTarget = rightDrive.getCurrentPosition() - (int)(-approxInches * (countsPerYard / 36.0) - 6);
+
+        leftDrive.setTargetPosition(lTarget);
+        rightDrive.setTargetPosition(rTarget);
+
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
+
+        while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive() && !endMove) {
+            if (range.getDistance(DistanceUnit.INCH) < rangeInches) {
+                endMove = true;
+                leftDrive.setPower(0.0);
+                rightDrive.setPower(0.0);
+            }
+            idle();
+            telemetry.addData("range", range.getDistance(DistanceUnit.INCH));
+            updateTelemetry(telemetry);
+        }
+
+        sleep(delayMillis);
+    }
 
     /**
      * Created on 9/10/16
@@ -275,12 +304,13 @@ public class Autonomous4507 extends LinearOpMode {
      */
 
     public void driveTurn(int degrees, double speed, long delayMillis) throws InterruptedException {
-        if (blue) {
-            degrees = degrees * -1;
-        }
+        int desiredHeading;
+// if (blue) {
+//            degrees = degrees * -1;
+//        }
 
-        driveTurnWithEncoders(degrees, speed);
-        driveTurnWithGyro(degrees);
+        desiredHeading = driveTurnWithEncodersRETURNSdesiredHeading(degrees, speed);
+        driveTurnWithGyro(desiredHeading);
 
         sleep(delayMillis);
     }
@@ -291,7 +321,13 @@ public class Autonomous4507 extends LinearOpMode {
      * @param speed is how fast to turn
      */
 
-    public void driveTurnWithEncoders(int degrees, double speed) {
+    public int driveTurnWithEncodersRETURNSdesiredHeading(int degrees, double speed) {
+        int desiredHeading = gyro.getHeading() + degrees;
+        if (desiredHeading > 359) {
+            desiredHeading = desiredHeading - 360;
+        } else if (desiredHeading < 0) {
+            desiredHeading = desiredHeading + 360;
+        }
         int lTarget = leftDrive.getCurrentPosition() + (degrees * (countsPer4Donuts / 1440));
         int rTarget = rightDrive.getCurrentPosition() - (degrees * (countsPer4Donuts / 1440));
 
@@ -302,32 +338,35 @@ public class Autonomous4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive()) {
+//            gyroError = gyro.getHeading() - desiredHeading;
+//            if (gyroError > 180) {
+//                gyroError = 360 - gyroError;
+//            }
+//            if (gyroError < -180) {
+//                gyroError = 360 + gyroError;
+//            }
+//            leftDrive.setPower(Range.clip(0 - (gyroError * 0.03), -1, 1));
+//            rightDrive.setPower(Range.clip(0 + (gyroError * 0.03), -1, 1));
             idle();
         }
+        return desiredHeading;
     }
 
     /**
      *
-     * @param degrees is how many degrees to turn; when negated turns clockwise, and vice versa
+     * @param desiredHeading is how many degrees to turn; when negated turns clockwise, and vice versa
      */
 
-    public void driveTurnWithGyro (int degrees) {
-        int desiredHeading;
+    public void driveTurnWithGyro (int desiredHeading) {
         int gyroError;
         boolean exitTurn = false;
+        long pre = System.currentTimeMillis();
 
         leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        desiredHeading = gyro.getHeading() + degrees;
-        if (desiredHeading > 360) {
-            desiredHeading = desiredHeading - 360;
-        }
-        if (desiredHeading < 0) {
-            desiredHeading = desiredHeading + 360;
-        }
-
         while (!exitTurn && opModeIsActive()) {
+            long now = System.currentTimeMillis();
             gyroError = gyro.getHeading() - desiredHeading;
             if (gyroError > 180) {
                 gyroError = 360 - gyroError;
@@ -338,8 +377,11 @@ public class Autonomous4507 extends LinearOpMode {
             if (gyroError == 0) {
                 exitTurn = true;
             }
-            leftDrive.setPower(Range.clip(0 - (gyroError * 0.03), -0.25, 0.25));
-            rightDrive.setPower(Range.clip(0 + (gyroError * 0.03), -0.25, 0.25));
+            if (pre + 1000 < now) {
+                exitTurn = true;
+            }
+            leftDrive.setPower(Range.clip(0 - (0.04 + (gyroError * 0.03)), -0.25, 0.25));
+            rightDrive.setPower(Range.clip(0 + (0.04 + (gyroError * 0.03)), -0.25, 0.25));
             idle();
         }
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -350,40 +392,33 @@ public class Autonomous4507 extends LinearOpMode {
      * TODO: This is going to be an absolute pain in the butt
      * @param speed is the speed to go
      * @param colorRed is whether or not we are looking for red
-     * @param desiredDistAwayInInches is the distance we want to be from the wall when we attempt to press the button
      */
 
-    public void beacon(double speed, boolean colorRed, int desiredDistAwayInInches) {
-        boolean frontLooks = false;
-        boolean backLooks = false;
+    public void beacon(double speed, boolean colorRed) {
         boolean stop = false;
 
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        // TODO: Need to figure out which color is which :
-        if (!colorRed) {
-            speed = -speed;
-            backLooks = true;
-        } else if (colorRed) {
-            frontLooks = true;
-        }
-
-        rangeRotater.setPosition(0.5);
 
         leftDrive.setPower(speed);
         rightDrive.setPower(speed);
 
         while (!stop && opModeIsActive()) {
-
-            if (backLooks) {
-                Color.RGBToHSV(fColorb.red(), fColorb.green(), fColorb.blue(), backFloorHsvValues);
-                if (backFloorHsvValues[0] >= 69.0) {
+//            Color.RGBToHSV(bColor.red(), bColor.green(), bColor.blue(), beaconHsvValues);
+            if (colorRed) {
+                if (beaconHsvValues[0] >= 69.0) {
                     leftDrive.setPower(0.0);
                     rightDrive.setPower(0.0);
+                    stop = true;
                 }
             }
         }
+
+//        while (!beaconStopTouch.isPressed()) {
+//            beaconPusher.setPower(1.0);
+//        }
+//        beaconPusher.setPower(0.0);
     }
 
     /**
@@ -395,6 +430,7 @@ public class Autonomous4507 extends LinearOpMode {
         for (int c = 0; c < times; c++) {
             kick();
             index();
+            sleep(500);
         }
     }
 
@@ -403,11 +439,10 @@ public class Autonomous4507 extends LinearOpMode {
      */
 
     public void kick() {
-        kicker.setTargetPosition(kicker.getCurrentPosition() + 1120);
-        kicker.setPower(1.0);
-        while (kicker.isBusy() && opModeIsActive()) {
-            idle();
-        }
+        kicker.setPower(-1.0);
+        while (opModeIsActive() && !kickStop.isPressed()) { idle(); }
+        while (opModeIsActive() && kickStop.isPressed()) { idle(); }
+        kicker.setPower(0.0);
     }
 
     /**
@@ -415,17 +450,18 @@ public class Autonomous4507 extends LinearOpMode {
      */
 
     public void index() {
-
+        indexer.setPosition(0.63);
+        sleep(300);
+        indexer.setPosition(0.8);
     }
 
     /**
-     *
      * @param onOff is a boolean to determine whether to stop or start the sweeper
      */
 
     public void sweep(boolean onOff) {
         if (onOff) {
-            sweeper.setPower(1.0);
+            sweeper.setPower(-1.0);
         } else if (!onOff) {
             sweeper.setPower(0.0);
         }

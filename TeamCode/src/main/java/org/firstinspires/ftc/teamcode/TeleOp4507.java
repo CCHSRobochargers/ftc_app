@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -28,77 +29,148 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp(name="Teleop", group="4507")  // @Autonomous(...) is the other common choice
 //@Disabled
 public class TeleOp4507 extends OpMode {
+    enum KickIndex {DELAYSTART, DELAYEND, KICKSTART, KICKEND, INDEXSTART, INDEXEND, IDLE}
+
+    KickIndex currentKI;
+    KickIndex nextKI;
+    KickIndex chooseKI;
+    long now;
+    long delayUntil;
+    long delayTime;
 
     DcMotor leftDrive;
     DcMotor rightDrive;
     DcMotor kicker;
     DcMotor sweeper;
 
+    Servo indexer;
+
+    TouchSensor kickerStop;
+
+    boolean sweepButtonLockOut = false;
     boolean sweeperOn = false;
     boolean kickerOn = false;
 
 //
     @Override
     public void init() {
-        leftDrive = hardwareMap.dcMotor.get("l1");
+        currentKI = KickIndex.IDLE;
+        nextKI = KickIndex.IDLE;
+        chooseKI = KickIndex.IDLE;
+
+        leftDrive = hardwareMap.dcMotor.get("l");
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightDrive = hardwareMap.dcMotor.get("r1");
+        rightDrive = hardwareMap.dcMotor.get("r");
         rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         kicker = hardwareMap.dcMotor.get("kick");
-        kicker.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        kicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sweeper = hardwareMap.dcMotor.get("sweep");
         sweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        indexer = hardwareMap.servo.get("ind");
+        indexer.setPosition(0.8);
+
+        kickerStop = hardwareMap.touchSensor.get("kT");
     }
 
     @Override
     public void loop() {
-        double lSP = gamepad1.left_stick_y;
-        double rSP = gamepad1.right_stick_y;
+        double lSP = -gamepad1.left_stick_y;
+        double rSP = -gamepad1.right_stick_y;
 
 
         lSP = Range.clip(lSP, -1.0, 1.0);
         rSP = Range.clip(rSP, -1.0, 1.0);
 
         if (gamepad1.dpad_up) {
-            lSP = 0.08;
-            rSP = 0.08;
+            lSP = -1.0;
+            rSP = -1.0;
         } else if (gamepad1.dpad_down) {
-            lSP = -0.08;
-            rSP = -0.08;
+            lSP = 1.0;
+            rSP = 1.0;
         }
 
         if (gamepad2.a) {
-            sweeperOn = true;
+            sweeper.setPower(-1.0);
         } else if (gamepad2.b) {
-            sweeperOn = false;
-        }
-        if (gamepad2.x) {
-            kickerOn = true;
+            sweeper.setPower(0.0);
         } else if (gamepad2.y) {
-            kickerOn = false;
+            sweeper.setPower(1.0);
         }
 
+//        if (!sweepButtonLockOut && gamepad2.a) {
+//            sweepButtonLockOut = true;
+//            if (!sweeperOn) {
+//                sweeper.setPower(-1.0);
+//                sweeperOn = true;
+//            } else if (sweeperOn) {
+//                sweeper.setPower(0.0);
+//                sweeperOn = false;
+//            }
+//        } else if (gamepad2.b) {
+//            sweepButtonLockOut = false;
+//        }
+        if (gamepad2.x && currentKI == KickIndex.IDLE) {
+            chooseKI = KickIndex.INDEXSTART;
+        }
+        if (gamepad1.a && currentKI == KickIndex.IDLE && !gamepad2.x) {
+            chooseKI = KickIndex.KICKSTART;
+        }
         leftDrive.setPower(lSP);
         rightDrive.setPower(rSP);
 
-        if (sweeperOn) {
-            sweeper.setPower(1.0);
-        } else if (!sweeperOn) {
-            sweeper.setPower(0.0);
+        switch (currentKI) {
+            case DELAYSTART:
+                now = System.currentTimeMillis();
+                delayUntil = now + delayTime;
+                currentKI = currentKI.DELAYEND;
+                break;
+
+            case DELAYEND:
+                if (System.currentTimeMillis() >= delayUntil) {
+                    currentKI = nextKI;
+                }
+                break;
+
+            case IDLE:
+                currentKI = chooseKI;
+                break;
+
+            case KICKSTART:
+                kicker.setPower(-1.0);
+                currentKI = KickIndex.KICKEND;
+                break;
+
+            case KICKEND:
+                if (kickerStop.isPressed()) {
+                    kicker.setPower(0.0);
+                    currentKI = KickIndex.INDEXSTART;
+                }
+                break;
+
+            case INDEXSTART:
+                indexer.setPosition(0.63);
+                currentKI = KickIndex.DELAYSTART;
+                nextKI = KickIndex.INDEXEND;
+                delayTime = 300;
+                break;
+
+            case INDEXEND:
+                indexer.setPosition(0.8);
+                currentKI = KickIndex.DELAYSTART;
+                nextKI = KickIndex.IDLE;
+                chooseKI = KickIndex.IDLE;
+                delayTime = 500;
+                break;
         }
 
-        if (kickerOn) {
-            if (!kicker.isBusy()) {
-                kicker.setTargetPosition(kicker.getCurrentPosition() + 1120);
-                kicker.setPower(1.0);
-            }
-        } else if (!kickerOn) {
-            kicker.setPower(0.0);
-        }
+
+
 
         telemetry.addData("left", leftDrive.getCurrentPosition());
         telemetry.addData("right", rightDrive.getCurrentPosition());
+        telemetry.addData("indexer", indexer.getPosition());
         updateTelemetry(telemetry);
     }
 }
