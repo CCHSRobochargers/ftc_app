@@ -66,14 +66,9 @@ public class Autonomous4507 extends LinearOpMode {
 //    CRServo beaconPusher;
     // Sensors
     ModernRoboticsI2cGyro gyro;
-//    ColorSensor bColor;
-    float beaconHsvValues[] = {0F,0F,0F};
-//    TouchSensor beaconStopTouch;
+    int supposedToBeHeading;
+    ColorSensor bColor;
     TouchSensor kickStop;
-//    ColorSensor fColorf;
-//    float frontFloorHsvValues[] = {0F,0F,0F};
-//    ColorSensor fColorb;
-//    float backFloorHsvValues[] = {0F,0F,0F};
     ModernRoboticsI2cRangeSensor range;
 //    //Switches
 //    DigitalChannel tileSw;
@@ -92,38 +87,13 @@ public class Autonomous4507 extends LinearOpMode {
     long slowSpDelay;
 
     // These variables are for autonomous.
-    boolean red;
+    boolean red = false;
     boolean blue;
     boolean diagTile;
     boolean straightTile;
     boolean beaconY;
     boolean beaconN;
     boolean endMove = false;
-
-    double move0a;
-    double move0b;
-    double move1a;
-    double move1b;
-    double move2;
-    double move3;
-    double move4a;
-    double move4b;
-    double move5;
-    double move6;
-
-    int turn0a;
-    int turn0b;
-    int turn1;
-    int turn2;
-    int turn3;
-
-    // beacon dist must be in cm ****
-    double beaconDist;
-    boolean redR;
-    boolean redL;
-    boolean blueR;
-    boolean blueL;
-
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -134,9 +104,11 @@ public class Autonomous4507 extends LinearOpMode {
         // DcMotor
         leftDrive = hardwareMap.dcMotor.get("l");
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightDrive = hardwareMap.dcMotor.get("r");
         rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         kicker = hardwareMap.dcMotor.get("kick");
         kicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sweeper = hardwareMap.dcMotor.get("sweep");
@@ -148,9 +120,7 @@ public class Autonomous4507 extends LinearOpMode {
 //        beaconPusher.setPower(0.0);
         // Sensors
         gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
-//        bColor = hardwareMap.colorSensor.get("bC");
-//        fColorf = hardwareMap.colorSensor.get("cFF");
-//        fColorb = hardwareMap.colorSensor.get("cFB");
+        bColor = hardwareMap.colorSensor.get("cS");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
 //        beaconStopTouch = hardwareMap.touchSensor.get("bST");
         kickStop = hardwareMap.touchSensor.get("kT");
@@ -224,6 +194,7 @@ public class Autonomous4507 extends LinearOpMode {
 //            dim.setLED(RED_LED_CHANNEL, false);
 //            dim.setLED(BLUE_LED_CHANNEL, true);
         }
+        supposedToBeHeading = gyro.getHeading();
         sweep(true);
         driveStraight(24, 1.0, 400);
         shoot(2);
@@ -232,7 +203,10 @@ public class Autonomous4507 extends LinearOpMode {
         driveTurn(45, 0.75, 1000);
         driveStraight(20, 8, 1.0, 100);
         driveTurn(90, 0.75, 100);
-//        beacon(1.0, true);
+        driveTurnWithGyro(supposedToBeHeading);
+        beacon(red ? 1.0 : -1.0, false, 100);
+        driveStraight(red ? 12 : -12, 1.0, 100);
+        beacon(red ? 1.0 : -1.0, false, 100);
         sweep(false);
 
 
@@ -305,9 +279,12 @@ public class Autonomous4507 extends LinearOpMode {
 
     public void driveTurn(int degrees, double speed, long delayMillis) throws InterruptedException {
         int desiredHeading;
-// if (blue) {
-//            degrees = degrees * -1;
-//        }
+        supposedToBeHeading = supposedToBeHeading + degrees;
+        if (supposedToBeHeading > 359) {
+            supposedToBeHeading = supposedToBeHeading - 360;
+        } else if (supposedToBeHeading < 0) {
+            supposedToBeHeading = supposedToBeHeading + 360;
+        }
 
         desiredHeading = driveTurnWithEncodersRETURNSdesiredHeading(degrees, speed);
         driveTurnWithGyro(desiredHeading);
@@ -394,7 +371,7 @@ public class Autonomous4507 extends LinearOpMode {
      * @param colorRed is whether or not we are looking for red
      */
 
-    public void beacon(double speed, boolean colorRed) {
+    public void beacon(double speed, boolean colorRed, long delay) {
         boolean stop = false;
 
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -405,9 +382,14 @@ public class Autonomous4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while (!stop && opModeIsActive()) {
-//            Color.RGBToHSV(bColor.red(), bColor.green(), bColor.blue(), beaconHsvValues);
             if (colorRed) {
-                if (beaconHsvValues[0] >= 69.0) {
+                if (bColor.red() > bColor.blue()) {
+                    leftDrive.setPower(0.0);
+                    rightDrive.setPower(0.0);
+                    stop = true;
+                }
+            } else if (!colorRed) {
+                if (bColor.blue() > bColor.red()) {
                     leftDrive.setPower(0.0);
                     rightDrive.setPower(0.0);
                     stop = true;
@@ -419,6 +401,9 @@ public class Autonomous4507 extends LinearOpMode {
 //            beaconPusher.setPower(1.0);
 //        }
 //        beaconPusher.setPower(0.0);
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sleep(delay);
     }
 
     /**
@@ -451,8 +436,7 @@ public class Autonomous4507 extends LinearOpMode {
 
     public void index() {
         indexer.setPosition(0.63);
-        sleep(300);
-        indexer.setPosition(0.8);
+        sleep(500);
     }
 
     /**
