@@ -63,7 +63,7 @@ public class Autonomous4507 extends LinearOpMode {
     DcMotor sweeper;
     // Servos
     Servo indexer;
-//    CRServo beaconPusher;
+    Servo beaconPusher;
     // Sensors
     ModernRoboticsI2cGyro gyro;
     int supposedToBeHeading;
@@ -116,10 +116,10 @@ public class Autonomous4507 extends LinearOpMode {
         // Servos
         indexer = hardwareMap.servo.get("ind");
         indexer.setPosition(0.8);
-//        beaconPusher = hardwareMap.crservo.get("bPu");
-//        beaconPusher.setPower(0.0);
+        beaconPusher = hardwareMap.servo.get("bPu");
+        beaconPusher.setPosition(0.5);
         // Sensors
-        gyro = (ModernRoboticsI2cGyro)hardwareMap.gyroSensor.get("gyro");
+        gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
         bColor = hardwareMap.colorSensor.get("cS");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
 //        beaconStopTouch = hardwareMap.touchSensor.get("bST");
@@ -204,19 +204,18 @@ public class Autonomous4507 extends LinearOpMode {
         driveStraight(20, 8, 1.0, 100);
         driveTurn(90, 0.75, 100);
         driveTurnWithGyro(supposedToBeHeading);
-        beacon(red ? 1.0 : -1.0, false, 100);
+        beacon(red ? 1.0 : -1.0, false, 500);
         driveStraight(red ? 12 : -12, 1.0, 100);
         beacon(red ? 1.0 : -1.0, false, 100);
         sweep(false);
-
-
-
-
-
-
-
-
     }
+
+
+
+
+
+
+
 
 
     public void driveStraight(double approxInches, int rangeInches, double speed, long delayMillis) throws InterruptedException {
@@ -396,11 +395,11 @@ public class Autonomous4507 extends LinearOpMode {
                 }
             }
         }
-
-//        while (!beaconStopTouch.isPressed()) {
-//            beaconPusher.setPower(1.0);
-//        }
-//        beaconPusher.setPower(0.0);
+        beaconPusher.setPosition(0.0);
+        sleep(3000);
+        beaconPusher.setPosition(1.0);
+        sleep(3000);
+        beaconPusher.setPosition(0.5);
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sleep(delay);
