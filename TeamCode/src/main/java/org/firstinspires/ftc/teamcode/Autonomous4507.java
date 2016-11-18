@@ -32,6 +32,7 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.Range;
@@ -55,7 +56,8 @@ public class Autonomous4507 extends LinearOpMode {
     // Device Interface Module
 //    DeviceInterfaceModule dim;
 //    final int BLUE_LED_CHANNEL = 0;
-//    final int RED_LED_CHANNEL = 1;
+//    final i
+// nt RED_LED_CHANNEL = 1;
     // DcMotor
     DcMotor leftDrive;
     DcMotor rightDrive;
@@ -71,9 +73,10 @@ public class Autonomous4507 extends LinearOpMode {
     TouchSensor kickStop;
     ModernRoboticsI2cRangeSensor range;
 //    //Switches
-//    DigitalChannel tileSw;
-//    DigitalChannel colorSw;
-//    DigitalChannel beaconSw;
+    DigitalChannel tileSw;
+    DigitalChannel colorSw;
+    DigitalChannel beaconSw;
+    DigitalChannel shootSw;
 //    // Elapsed Time
 //    ElapsedTime elapsedTime;
 
@@ -87,12 +90,14 @@ public class Autonomous4507 extends LinearOpMode {
     long slowSpDelay;
 
     // These variables are for autonomous.
-    boolean red = false;
+    boolean red;
     boolean blue;
     boolean diagTile;
     boolean straightTile;
     boolean beaconY;
     boolean beaconN;
+    boolean shootY;
+    boolean shootN;
     boolean endMove = false;
 
     @Override
@@ -125,30 +130,38 @@ public class Autonomous4507 extends LinearOpMode {
 //        beaconStopTouch = hardwareMap.touchSensor.get("bST");
         kickStop = hardwareMap.touchSensor.get("kT");
 //        //Switches
-//        tileSw = hardwareMap.digitalChannel.get("tSw");
-//        colorSw = hardwareMap.digitalChannel.get("cSw");
-//        beaconSw = hardwareMap.digitalChannel.get("bSw");
-//        if(tileSw.getState()) {
+        tileSw = hardwareMap.digitalChannel.get("tSw");
+        colorSw = hardwareMap.digitalChannel.get("cSw");
+        beaconSw = hardwareMap.digitalChannel.get("bSw");
+        shootSw = hardwareMap.digitalChannel.get("sSw");
+//        if(tileSw.getState()) { //d0
 //            diagTile = true;
 //            straightTile = false;
 //        } else if (!tileSw.getState()) {
 //            diagTile = false;
 //            straightTile = true;
 //        }
-//        if(colorSw.getState()) {
-//            red = true;
-//            blue = false;
-//        } else if (!colorSw.getState()) {
-//            red = false;
-//            blue = true;
-//        }
-//        if (beaconSw.getState()) {
-//            beaconY = true;
-//            beaconN = true;
-//        } else if (!beaconSw.getState()) {
-//            beaconY = false;
-//            beaconN = true;
-//        }
+        if(colorSw.getState()) { //d1
+            red = false;
+            blue = true;
+        } else if (!colorSw.getState()) {
+            red = true;
+            blue = false;
+        }
+        if (beaconSw.getState()) { //d2
+            beaconY = true;
+            beaconN = false;
+        } else if (!beaconSw.getState()) {
+            beaconY = false;
+            beaconN = true;
+        }
+        if (shootSw.getState()) { //d3
+            shootY = false;
+            shootN = true;
+        } else if (!shootSw.getState()) {
+            shootY = true;
+            shootN = false;
+        }
 //        // Elapsed Time
 //        elapsedTime = new ElapsedTime();
         gyro.calibrate();
@@ -196,7 +209,7 @@ public class Autonomous4507 extends LinearOpMode {
         }
         supposedToBeHeading = gyro.getHeading();
         sweep(true);
-        driveStraight(24, 1.0, 400);
+        driveStraight(20, 1.0, 400);
         shoot(2);
         driveTurn(45, 0.75, 100);
         driveStraight(32, 1.0, 100);
@@ -205,8 +218,7 @@ public class Autonomous4507 extends LinearOpMode {
         driveTurn(90, 0.75, 100);
         driveTurnWithGyro(supposedToBeHeading);
         beacon(red ? 1.0 : -1.0, false, 500);
-        driveStraight(red ? 12 : -12, 1.0, 100);
-        beacon(red ? 1.0 : -1.0, false, 100);
+        beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
         sweep(false);
     }
 
@@ -394,11 +406,51 @@ public class Autonomous4507 extends LinearOpMode {
                     stop = true;
                 }
             }
+            idle();
         }
         beaconPusher.setPosition(0.0);
-        sleep(3000);
+        sleep(2500);
         beaconPusher.setPosition(1.0);
-        sleep(3000);
+        sleep(2500);
+        beaconPusher.setPosition(0.5);
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sleep(delay);
+    }
+
+    public void beacon(double distB4Press, double speed, boolean colorRed, long delay) {
+        boolean stop = false;
+        int target = leftDrive.getCurrentPosition() - (int)(-distB4Press * countsPerYard / 36);
+
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
+
+        while (!stop && opModeIsActive()) {
+            if (leftDrive.getCurrentPosition() < target) {
+                if (colorRed) {
+                    if (bColor.red() > bColor.blue()) {
+                        leftDrive.setPower(0.0);
+                        rightDrive.setPower(0.0);
+                        stop = true;
+                    }
+                } else if (!colorRed) {
+                    if (bColor.blue() > bColor.red()) {
+                        leftDrive.setPower(0.0);
+                        rightDrive.setPower(0.0);
+                        stop = true;
+                    }
+                }
+            }
+            idle();
+        }
+        beaconPusher.setPosition(0.0);
+        sleep(2500);
+        beaconPusher.setPosition(1.0);
+        sleep(2500);
         beaconPusher.setPosition(0.5);
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
