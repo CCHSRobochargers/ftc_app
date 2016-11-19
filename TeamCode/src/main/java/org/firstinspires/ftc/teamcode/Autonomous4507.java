@@ -209,16 +209,28 @@ public class Autonomous4507 extends LinearOpMode {
         }
         supposedToBeHeading = gyro.getHeading();
         sweep(true);
-        driveStraight(20, 1.0, 400);
-        shoot(2);
-        driveTurn(45, 0.75, 100);
-        driveStraight(32, 1.0, 100);
-        driveTurn(45, 0.75, 1000);
-        driveStraight(20, 8, 1.0, 100);
-        driveTurn(90, 0.75, 100);
-        driveTurnWithGyro(supposedToBeHeading);
-        beacon(red ? 1.0 : -1.0, false, 500);
-        beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
+        driveStraight(22, 1.0, 450);
+        shoot(shootY ? 2 : 0);
+
+        if (beaconY) {
+            driveTurn(55, 0.75, 1000);
+            driveStraight(31, 1.0, 100);
+            driveTurn(50, 0.75, 1000);
+            driveStraight(20, 8, 1.0, 100);
+            driveTurn(90, 0.75, 100);
+            driveTurnWithGyro(supposedToBeHeading);
+            beacon(red ? 1.0 : -1.00, false, 500);
+            beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
+        } else if (!beaconY) {
+            driveTurn(45, 0.75, 1000);
+            driveStraight(25, 1.0, 100);
+            driveTurn(-80, 0.75, 1000);
+            driveStraight(17, 1.0, 100);
+            driveTurn(-100, 0.75, 1000);
+            driveStraight(12, 1.0, 100);
+            driveTurn(-90, 0.75, 100);
+            driveStraight(60, 1.0, 100);
+        }
         sweep(false);
     }
 

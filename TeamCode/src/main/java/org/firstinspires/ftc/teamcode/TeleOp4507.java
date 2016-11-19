@@ -44,6 +44,7 @@ public class TeleOp4507 extends OpMode {
     DcMotor sweeper;
 
     Servo indexer;
+    Servo beaconPusher;
 
     TouchSensor kickerStop;
 
@@ -70,6 +71,8 @@ public class TeleOp4507 extends OpMode {
 
         indexer = hardwareMap.servo.get("ind");
         indexer.setPosition(0.8);
+        beaconPusher = hardwareMap.servo.get("bPu");
+        beaconPusher.setPosition(0.5);
 
         kickerStop = hardwareMap.touchSensor.get("kT");
     }
