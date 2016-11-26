@@ -177,29 +177,6 @@ public class Autonomous4507 extends LinearOpMode {
         waitForStart();
 
 
-//        if (straightTile) {
-//            driveStraight(move1a + move1b, fastSpeed, fastSpDelay);
-//        } else if (diagTile) {
-//            driveStraight(move0a, fastSpeed, fastSpDelay);
-//            driveTurn(turn0a, mediumSpeed, slowSpDelay);
-//            driveStraight(move0b, fastSpeed, fastSpDelay);
-//            driveTurn(turn0b, mediumSpeed, slowSpDelay);
-//            driveStraight(move1b, fastSpeed, fastSpDelay);
-//        }
-//        if (beaconY) {
-//            driveTurn(turn1, mediumSpeed, slowSpDelay);
-//            driveStraight(move2, fastSpeed, fastSpDelay);
-//            driveTurn(turn2, mediumSpeed, slowSpDelay);
-//            driveStraight(move3, slowSpeed,slowSpDelay);
-//            // add button code
-//            driveStraight(move4a, fastSpeed, fastSpDelay);
-//            driveStraight(move4b, slowSpeed, slowSpDelay);
-//            // add button code
-//            driveStraight(move5, fastSpeed, fastSpDelay);
-//            driveTurn(turn3, mediumSpeed, slowSpDelay);
-//            driveStraight(move6, fastSpeed, fastSpDelay);
-//        }
-
         while (gyro.isCalibrating() && opModeIsActive()) {
             idle();
         }
@@ -207,28 +184,29 @@ public class Autonomous4507 extends LinearOpMode {
 //            dim.setLED(RED_LED_CHANNEL, false);
 //            dim.setLED(BLUE_LED_CHANNEL, true);
         }
+
         supposedToBeHeading = gyro.getHeading();
         sweep(true);
         driveStraight(22, 1.0, 450);
         shoot(shootY ? 2 : 0);
 
         if (beaconY) {
-            driveTurn(55, 0.75, 1000);
-            driveStraight(31, 1.0, 100);
-            driveTurn(50, 0.75, 1000);
+            driveTurn(red ? -55 : 55, 0.75, 1000);
+            driveStraight(34, 1.0, 100);
+            driveTurn(red ? -50 : 50, 0.75, 1000);
             driveStraight(20, 8, 1.0, 100);
-            driveTurn(90, 0.75, 100);
+            driveTurn(red ? -90 : 90, 0.75, 100);
             driveTurnWithGyro(supposedToBeHeading);
             beacon(red ? 1.0 : -1.00, false, 500);
             beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
         } else if (!beaconY) {
-            driveTurn(45, 0.75, 1000);
+            driveTurn(red ? -45 : 45, 0.75, 1000);
             driveStraight(25, 1.0, 100);
-            driveTurn(-80, 0.75, 1000);
+            driveTurn(red ? 80 : -80, 0.75, 1000);
             driveStraight(17, 1.0, 100);
-            driveTurn(-100, 0.75, 1000);
+            driveTurn(red ? 100 : -100, 0.75, 1000);
             driveStraight(12, 1.0, 100);
-            driveTurn(-90, 0.75, 100);
+            driveTurn(red ? 90 : -90, 0.75, 100);
             driveStraight(60, 1.0, 100);
         }
         sweep(false);
@@ -264,6 +242,8 @@ public class Autonomous4507 extends LinearOpMode {
             updateTelemetry(telemetry);
         }
 
+        leftDrive.setPower(0.0);
+        rightDrive.setPower(0.0);
         sleep(delayMillis);
     }
 
@@ -289,6 +269,8 @@ public class Autonomous4507 extends LinearOpMode {
             idle();
         }
 
+        leftDrive.setPower(0.0);
+        rightDrive.setPower(0.0);
         sleep(delayMillis);
     }
 
