@@ -42,9 +42,11 @@ public class TeleOp4507 extends OpMode {
     DcMotor rightDrive;
     DcMotor kicker;
     DcMotor sweeper;
+    DcMotor capper;
 
     Servo indexer;
     Servo beaconPusher;
+
 
     TouchSensor kickerStop;
 
@@ -68,6 +70,8 @@ public class TeleOp4507 extends OpMode {
         kicker.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         sweeper = hardwareMap.dcMotor.get("sweep");
         sweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        capper = hardwareMap.dcMotor.get("cap");
+        capper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         indexer = hardwareMap.servo.get("ind");
         indexer.setPosition(0.8);
@@ -81,10 +85,14 @@ public class TeleOp4507 extends OpMode {
     public void loop() {
         double lSP = -gamepad1.left_stick_y;
         double rSP = -gamepad1.right_stick_y;
+        double sw = gamepad2.left_stick_y;
+        double cap = gamepad2.right_stick_y;
 
 
         lSP = Range.clip(lSP, -1.0, 1.0);
         rSP = Range.clip(rSP, -1.0, 1.0);
+        sw = Range.clip(sw, -1.0, 1.0);
+        cap = Range.clip(cap, -1.0, 1.0);
 
         if (gamepad1.dpad_up) {
             lSP = -1.0;
@@ -95,33 +103,19 @@ public class TeleOp4507 extends OpMode {
         }
 
         if (gamepad2.a) {
-            sweeper.setPower(-1.0);
-        } else if (gamepad2.b) {
-            sweeper.setPower(0.0);
-        } else if (gamepad2.y) {
-            sweeper.setPower(1.0);
+            sweeper.setPower(sw);
         }
 
-//        if (!sweepButtonLockOut && gamepad2.a) {
-//            sweepButtonLockOut = true;
-//            if (!sweeperOn) {
-//                sweeper.setPower(-1.0);
-//                sweeperOn = true;
-//            } else if (sweeperOn) {
-//                sweeper.setPower(0.0);
-//                sweeperOn = false;
-//            }
-//        } else if (gamepad2.b) {
-//            sweepButtonLockOut = false;
-//        }
         if (gamepad2.x && currentKI == KickIndex.IDLE) {
             chooseKI = KickIndex.INDEXSTART;
         }
         if (gamepad1.a && currentKI == KickIndex.IDLE && !gamepad2.x) {
             chooseKI = KickIndex.KICKSTART;
         }
+
         leftDrive.setPower(lSP);
         rightDrive.setPower(rSP);
+        capper.setPower(cap);
 
         switch (currentKI) {
             case DELAYSTART:
