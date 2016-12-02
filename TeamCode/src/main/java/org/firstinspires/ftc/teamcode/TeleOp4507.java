@@ -46,6 +46,7 @@ public class TeleOp4507 extends OpMode {
 
     Servo indexer;
     Servo beaconPusher;
+    Servo capBallLock;
 
 
     TouchSensor kickerStop;
@@ -77,6 +78,8 @@ public class TeleOp4507 extends OpMode {
         indexer.setPosition(0.8);
         beaconPusher = hardwareMap.servo.get("bPu");
         beaconPusher.setPosition(0.5);
+        capBallLock = hardwareMap.servo.get("cBL");
+        capBallLock.setPosition(0.0);
 
         kickerStop = hardwareMap.touchSensor.get("kT");
     }
@@ -95,11 +98,11 @@ public class TeleOp4507 extends OpMode {
         cap = Range.clip(cap, -1.0, 1.0);
 
         if (gamepad1.dpad_up) {
-            lSP = -0.3;
-            rSP = -0.3;
-        } else if (gamepad1.dpad_down) {
             lSP = 0.3;
             rSP = 0.3;
+        } else if (gamepad1.dpad_down) {
+            lSP = -0.3;
+            rSP = -0.3;
         }
 
         if (gamepad2.a) {
@@ -111,6 +114,12 @@ public class TeleOp4507 extends OpMode {
         }
         if (gamepad1.a && currentKI == KickIndex.IDLE && !gamepad2.x) {
             chooseKI = KickIndex.KICKSTART;
+        }
+
+        if (gamepad2.dpad_up) {
+            capBallLock.setPosition(0.0);
+        } else if (gamepad2.dpad_down) {
+            capBallLock.setPosition(1.0);
         }
 
         leftDrive.setPower(lSP);
