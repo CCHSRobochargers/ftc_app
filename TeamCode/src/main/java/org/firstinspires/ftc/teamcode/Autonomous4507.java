@@ -125,7 +125,7 @@ public class Autonomous4507 extends LinearOpMode {
         beaconPusher = hardwareMap.servo.get("bPu");
         beaconPusher.setPosition(0.5);
         capBallLock = hardwareMap.servo.get("cBL");
-        capBallLock.setPosition(0.5);
+        capBallLock.setPosition(0.92);
         // Sensors
         gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
         bColor = hardwareMap.colorSensor.get("cS");
@@ -190,27 +190,32 @@ public class Autonomous4507 extends LinearOpMode {
 
         supposedToBeHeading = gyro.getHeading();
         sweep(true);
+        capBallLock.setPosition(0.5);
         driveStraight(24, 1.0, 450);
         shoot(shootY ? 2 : 0);
 
         if (beaconY) {
             driveTurn(red ? -55 : 55, 0.75, 200);
-            driveStraight(red ? 24 : 32, 1.0, 100);
-            driveTurn(red ? -45  : 40, 0.75, 200);
-            driveStraight(30, 8, 1.0, 100);
+            driveStraight(red ? 22 : 32, 1.0, 100);
+            driveTurn(red ? -45 : 40, 0.75, 200);
+            driveStraight(red ? 29 : 30, red ? 9 : 8, 1.0, 100);
             driveTurn(red ? 90 : 90, 0.75, 100);
             driveTurnWithGyro(supposedToBeHeading);
             beacon(red ? 1.0 : -1.00, false, 500);
             beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
         } else if (!beaconY) {
-            driveTurn(red ? -45 : 45, 0.75, 200);
-            driveStraight(25, 1.0, 100);
-            driveTurn(red ? 80 : -80, 0.75, 200);
-            driveStraight(17, 1.0, 100);
-            driveTurn(red ? 100 : -100, 0.75, 200);
-            driveStraight(12, 1.0, 100);
-            driveTurn(red ? 90 : -90, 0.75, 100);
-            driveStraight(60, 1.0, 100);
+            driveTurn(red ? 10 : -10, 1.0, 200);
+//            driveTurn(red ? -45 : 45, 0.75, 200);
+//            driveStraight(25, 1.0, 100);
+//            driveTurn(red ? 80 : -80, 0.75, 200);
+//            driveStraight(17, 1.0, 100);
+//            driveTurn(red ? 100 : -100, 0.75, 200);
+//            driveStraight(12, 1.0, 100);
+//            driveTurn(red ? 90 : -90, 0.75, 100);
+//            driveStraight(60, 1.0, 100);
+            driveStraight(24, 1.0, 100);
+            driveTurn(red ? 55 : -55, 1.0, 200);
+            driveStraight(-72, 1.0, 100);
         }
         sweep(false);
     }
@@ -427,14 +432,14 @@ public class Autonomous4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while (!stop && opModeIsActive()) {
-            if (leftDrive.getCurrentPosition() < target) {
-                if (colorRed) {
+            if (red ? leftDrive.getCurrentPosition() > target : leftDrive.getCurrentPosition() < target) {
+                if (red) {
                     if (bColor.red() > bColor.blue()) {
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
                         stop = true;
                     }
-                } else if (!colorRed) {
+                } else if (!red) {
                     if (bColor.blue() > bColor.red()) {
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);

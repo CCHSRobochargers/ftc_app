@@ -79,7 +79,7 @@ public class TeleOp4507 extends OpMode {
         beaconPusher = hardwareMap.servo.get("bPu");
         beaconPusher.setPosition(0.5);
         capBallLock = hardwareMap.servo.get("cBL");
-        capBallLock.setPosition(0.0);
+        capBallLock.setPosition(1.0);
 
         kickerStop = hardwareMap.touchSensor.get("kT");
     }
