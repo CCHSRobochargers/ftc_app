@@ -198,10 +198,13 @@ public class Autonomous4507 extends LinearOpMode {
             driveTurn(red ? -55 : 55, 0.75, 200);
             driveStraight(red ? 22 : 32, 1.0, 100);
             driveTurn(red ? -45 : 40, 0.75, 200);
-            driveStraight(red ? 29 : 30, red ? 9 : 8, 1.0, 100);
+            driveStraight(red ? 28 : 30, red ? 8 : 8, 1.0, 100);
             driveTurn(red ? 90 : 90, 0.75, 100);
             driveTurnWithGyro(supposedToBeHeading);
-            beacon(red ? 1.0 : -1.00, false, 500);
+            if (red) {
+                driveTurn(2, 0.5, 200);
+            }
+            beacon(red ? 0.50 : -1.0, false, 500);
             beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
         } else if (!beaconY) {
             driveTurn(red ? 10 : -10, 1.0, 200);

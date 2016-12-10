@@ -1,5 +1,3 @@
-/*
-*/
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -13,30 +11,26 @@ import com.qualcomm.robotcore.hardware.UltrasonicSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-/**
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When an selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a PushBot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studios to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
- */
-
-@TeleOp(name="Teleop", group="4507")  // @Autonomous(...) is the other common choice
+@TeleOp(name="Teleop", group="4507")
 //@Disabled
 public class TeleOp4507 extends OpMode {
-    enum KickIndex {DELAYSTART, DELAYEND, KICKSTART, KICKEND, INDEXSTART, INDEXEND, IDLE}
+    enum Kick {DELAYSTART, DELAYEND, KICKSTART, KICKEND, IDLE}
+    enum Index {DELAYSTART, DELAYEND, INDEXSTART, INDEXEND, IDLE}
 
-    KickIndex currentKI;
-    KickIndex nextKI;
-    KickIndex chooseKI;
-    long now;
-    long delayUntil;
-    long delayTime;
+    Kick currentK;
+    Kick nextK;
+    Kick chooseK;
+    long nowK;
+    long delayUntilK;
+    long delayTimeK;
+
+    Index currentI;
+    Index nextI;
+    Index chooseI;
+    long nowI;
+    long delayUntilI;
+    long delayTimeI;
+
 
     DcMotor leftDrive;
     DcMotor rightDrive;
@@ -48,19 +42,18 @@ public class TeleOp4507 extends OpMode {
     Servo beaconPusher;
     Servo capBallLock;
 
-
     TouchSensor kickerStop;
+    TouchSensor indexStart;
 
-    boolean sweepButtonLockOut = false;
-    boolean sweeperOn = false;
-    boolean kickerOn = false;
-
-//
     @Override
     public void init() {
-        currentKI = KickIndex.IDLE;
-        nextKI = KickIndex.IDLE;
-        chooseKI = KickIndex.IDLE;
+        currentK = Kick.IDLE;
+        nextK = Kick.IDLE;
+        chooseK = Kick.IDLE;
+
+        currentI = Index.IDLE;
+        nextI = Index.IDLE;
+        chooseI = Index.IDLE;
 
         leftDrive = hardwareMap.dcMotor.get("l");
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -79,9 +72,10 @@ public class TeleOp4507 extends OpMode {
         beaconPusher = hardwareMap.servo.get("bPu");
         beaconPusher.setPosition(0.5);
         capBallLock = hardwareMap.servo.get("cBL");
-        capBallLock.setPosition(1.0);
+        capBallLock.setPosition(0.92);
 
         kickerStop = hardwareMap.touchSensor.get("kT");
+        indexStart = hardwareMap.touchSensor.get("iT");
     }
 
     @Override
@@ -109,11 +103,11 @@ public class TeleOp4507 extends OpMode {
             sweeper.setPower(sw);
         }
 
-        if (gamepad2.x && currentKI == KickIndex.IDLE) {
-            chooseKI = KickIndex.INDEXSTART;
+        if (gamepad2.x && currentK == Kick.IDLE && currentI == Index.IDLE && !gamepad1.a) {
+            chooseI = Index.INDEXSTART;
         }
-        if (gamepad1.a && currentKI == KickIndex.IDLE && !gamepad2.x) {
-            chooseKI = KickIndex.KICKSTART;
+        if (gamepad1.a && currentK == Kick.IDLE && currentI == Index.IDLE && !gamepad2.x) {
+            chooseK = Kick.KICKSTART;
         }
 
         if (gamepad2.dpad_up) {
@@ -122,60 +116,89 @@ public class TeleOp4507 extends OpMode {
             capBallLock.setPosition(1.0);
         }
 
+        if (gamepad2.dpad_left) {
+            beaconPusher.setPosition(0.0);
+        } else if (gamepad2.dpad_right){
+            beaconPusher.setPosition(1.0);
+        } else {
+            beaconPusher.setPosition(0.5);
+        }
+
         leftDrive.setPower(lSP);
         rightDrive.setPower(rSP);
         capper.setPower(cap);
 
-        switch (currentKI) {
+        switch (currentK) {
             case DELAYSTART:
-                now = System.currentTimeMillis();
-                delayUntil = now + delayTime;
-                currentKI = currentKI.DELAYEND;
+                nowK = System.currentTimeMillis();
+                delayUntilK = nowK + delayTimeK;
+                currentK = Kick.DELAYEND;
                 break;
 
             case DELAYEND:
-                if (System.currentTimeMillis() >= delayUntil) {
-                    currentKI = nextKI;
+                if (System.currentTimeMillis() >= delayUntilK) {
+                    currentK = nextK;
                 }
                 break;
 
             case IDLE:
-                currentKI = chooseKI;
+                currentK = chooseK;
                 break;
 
             case KICKSTART:
                 kicker.setPower(-1.0);
-                currentKI = KickIndex.KICKEND;
+                if (kickerStop.isPressed()) {
+                    currentK = Kick.KICKEND;
+                }
                 break;
 
             case KICKEND:
-                if (kickerStop.isPressed()) {
+                if (!kickerStop.isPressed()) {
                     kicker.setPower(0.0);
-                    currentKI = KickIndex.INDEXSTART;
+                    currentK = Kick.IDLE;
+                    chooseK = Kick.IDLE;
                 }
+                break;
+        }
+
+        switch (currentI) {
+            case DELAYSTART:
+                nowI = System.currentTimeMillis();
+                delayUntilI = nowI + delayTimeI;
+                currentI = Index.DELAYEND;
+                break;
+
+            case DELAYEND:
+                if (System.currentTimeMillis() >= delayUntilI) {
+                    currentI = nextI;
+                }
+                break;
+
+            case IDLE:
+                if (indexStart.isPressed()) {
+                    chooseI = Index.INDEXSTART;
+                }
+                currentI = chooseI;
                 break;
 
             case INDEXSTART:
                 indexer.setPosition(0.63);
-                currentKI = KickIndex.DELAYSTART;
-                nextKI = KickIndex.INDEXEND;
-                delayTime = 300;
+                currentI = Index.DELAYSTART;
+                nextI = Index.INDEXEND;
+                delayTimeI = 300;
                 break;
 
             case INDEXEND:
                 indexer.setPosition(0.8);
-                currentKI = KickIndex.DELAYSTART;
-                nextKI = KickIndex.IDLE;
-                chooseKI = KickIndex.IDLE;
-                delayTime = 500;
+                currentI = Index.IDLE;
+                chooseI = Index.IDLE;
                 break;
         }
 
-
-
-
         telemetry.addData("left", leftDrive.getCurrentPosition());
         telemetry.addData("right", rightDrive.getCurrentPosition());
+        telemetry.addData("kick", currentK.toString());
+        telemetry.addData("index", currentI.toString());
         telemetry.addData("indexer", indexer.getPosition());
         updateTelemetry(telemetry);
     }
