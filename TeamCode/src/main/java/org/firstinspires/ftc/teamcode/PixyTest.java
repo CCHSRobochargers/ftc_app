@@ -9,7 +9,9 @@ import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynch;
 import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl;
+import com.qualcomm.robotcore.util.TypeConversion;
 
+import java.nio.ByteOrder;
 import java.util.concurrent.locks.Lock;
 
 /**
@@ -23,7 +25,7 @@ public class PixyTest extends LinearOpMode {
     I2cDeviceSynch pixyReader;
     I2cAddr pixyADDR = I2cAddr.create8bit(0x54);
     int pixyRegister = 0x50;
-    byte[] pixyData = new byte[] { 1, 2, 3, -1, -2, -3 };
+    byte[] pixyData;// = new byte[] { 1, 2, 3, -1, -2, -3 };
     int pixyDataConverted;
     Lock pixyReadLock;
     int counter = 0;
@@ -38,8 +40,8 @@ public class PixyTest extends LinearOpMode {
         waitForStart();
         while(!isStopRequested()) {
 
-//            pixyData = pixyReader.read(pixyRegister, 6);
-//            pixyDataConverted = ((int) pixyData[0]);
+            pixyData = pixyReader.read(pixyRegister, 6);
+            pixyDataConverted = ((int) pixyData[0]);
             counter++;
     //        pixy.enableI2cReadMode(pixyADDR, 0x50, 6);
     //        while (!pixy.isI2cPortReady()) {
@@ -58,6 +60,7 @@ public class PixyTest extends LinearOpMode {
     //        pixyReadLock.unlock();
     //        pixy.setI2cPortActionFlag();
             String s = byteArrayToString(pixyData);
+            int i = TypeConversion.byteArrayToInt(pixyData, ByteOrder.LITTLE_ENDIAN);
             Log.i("pixyData", pixyData.toString());
             telemetry.addData("byte0", pixyData[0]);
             telemetry.addData("byte1", pixyData[1]);
@@ -67,7 +70,8 @@ public class PixyTest extends LinearOpMode {
             telemetry.addData("byte5", pixyData[5]);
             telemetry.addData("pixyData", pixyData);
             telemetry.addData("dataLength", pixyData.length);
-            telemetry.addData("s",s);
+            telemetry.addData("s", s);
+            telemetry.addData("i", i);
             telemetry.addData("counter", counter);
             updateTelemetry(telemetry);
 //            for(int c = 0; c < 6; c++) {
