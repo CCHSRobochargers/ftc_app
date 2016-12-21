@@ -192,17 +192,17 @@ public class Autonomous4507 extends LinearOpMode {
         sweep(true);
         capBallLock.setPosition(0.5);
         driveStraight(24, 1.0, 450);
+        /**/
         shoot(shootY ? 2 : 0);
-
         if (beaconY) {
             driveTurn(red ? -55 : 55, 0.75, 200);
             driveStraight(red ? 22 : 32, 1.0, 100);
             driveTurn(red ? -45 : 40, 0.75, 200);
             driveStraight(red ? 28 : 30, red ? 8 : 8, 1.0, 100);
-            driveTurn(red ? 90 : 90, 0.75, 100);
+            driveTurn(90, 0.75, 100);
             driveTurnWithGyro(supposedToBeHeading);
             if (red) {
-                driveTurn(2, 0.5, 200);
+                driveTurn(5, 0.5, 200);
             }
             beacon(red ? 0.50 : -1.0, false, 500);
             beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
@@ -302,8 +302,8 @@ public class Autonomous4507 extends LinearOpMode {
             supposedToBeHeading = supposedToBeHeading + 360;
         }
 
-        desiredHeading = driveTurnWithEncodersRETURNSdesiredHeading(degrees, speed);
-        driveTurnWithGyro(desiredHeading);
+        driveTurnWithEncoders(degrees, speed);
+        driveTurnWithGyro(supposedToBeHeading);
 
         sleep(delayMillis);
     }
@@ -314,7 +314,7 @@ public class Autonomous4507 extends LinearOpMode {
      * @param speed is how fast to turn
      */
 
-    public int driveTurnWithEncodersRETURNSdesiredHeading(int degrees, double speed) {
+    public void driveTurnWithEncoders(int degrees, double speed) {
         int desiredHeading = gyro.getHeading() + degrees;
         if (desiredHeading > 359) {
             desiredHeading = desiredHeading - 360;
@@ -342,7 +342,7 @@ public class Autonomous4507 extends LinearOpMode {
 //            rightDrive.setPower(Range.clip(0 + (gyroError * 0.03), -1, 1));
             idle();
         }
-        return desiredHeading;
+
     }
 
     /**
@@ -400,6 +400,10 @@ public class Autonomous4507 extends LinearOpMode {
         while (!stop && opModeIsActive()) {
             if (red) {
                 if (bColor.red() > bColor.blue()) {
+                    try {
+                        driveStraight(-3, 0.5, 200);
+                    } catch (InterruptedException e) {
+                    }
                     leftDrive.setPower(0.0);
                     rightDrive.setPower(0.0);
                     stop = true;
