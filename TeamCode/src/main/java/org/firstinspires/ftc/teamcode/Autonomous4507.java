@@ -39,6 +39,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
+import java.util.Arrays;
 
 
 /**
@@ -89,6 +90,7 @@ public class Autonomous4507 extends LinearOpMode {
     double slowSpeed;
     long fastSpDelay;
     long slowSpDelay;
+    int rangeCounter = 0;
 
     // These variables are for autonomous.
     boolean red;
@@ -231,10 +233,11 @@ public class Autonomous4507 extends LinearOpMode {
 
 
 
-    public void driveStraight(double approxInches, int rangeInches, double speed, long delayMillis) throws InterruptedException {
+    public void driveStraight(double approxInches, double rangeInches, double speed, long delayMillis) throws InterruptedException {
         boolean endMove = false;
         int lTarget = leftDrive.getCurrentPosition() - (int)(-approxInches * (countsPerYard / 36.0) - 6);
         int rTarget = rightDrive.getCurrentPosition() - (int)(-approxInches * (countsPerYard / 36.0) - 6);
+        double[] distances = new double[9];
 
         leftDrive.setTargetPosition(lTarget);
         rightDrive.setTargetPosition(rTarget);
@@ -243,13 +246,14 @@ public class Autonomous4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive() && !endMove) {
-            if (range.getDistance(DistanceUnit.INCH) < rangeInches) {
-                endMove = true;
-                leftDrive.setPower(0.0);
-                rightDrive.setPower(0.0);
+            for (int j = 0; j < distances.length; j++) {
+                distances[j] = range.getDistance(DistanceUnit.INCH);
+                range.wait(10);
             }
+            Arrays.sort(distances);
+            rangeInches = distances[4];
             idle();
-            telemetry.addData("range", range.getDistance(DistanceUnit.INCH));
+            telemetry.addData("range", rangeInches);
             updateTelemetry(telemetry);
         }
 

@@ -80,23 +80,23 @@ public class TeleOp4507 extends OpMode {
 
     @Override
     public void loop() {
-        double lSP = -gamepad1.left_stick_y;
-        double rSP = -gamepad1.right_stick_y;
+        double lSP = gamepad1.left_stick_y;
+        double rSP = gamepad1.right_stick_y;
         double sw = gamepad2.left_stick_y;
         double cap = gamepad2.right_stick_y;
 
 
-        lSP = Range.clip(lSP, -1.0, 1.0);
-        rSP = Range.clip(rSP, -1.0, 1.0);
+        lSP = Range.clip(lSP, -0.6, 0.6);
+        rSP = Range.clip(rSP, -0.6, 0.6);
         sw = Range.clip(sw, -1.0, 1.0);
         cap = Range.clip(cap, -1.0, 1.0);
 
         if (gamepad1.dpad_up) {
-            lSP = 0.3;
-            rSP = 0.3;
+            lSP = -0.2;
+            rSP = -0.2;
         } else if (gamepad1.dpad_down) {
-            lSP = -0.3;
-            rSP = -0.3;
+            lSP = 0.2;
+            rSP = 0.2;
         }
 
         if (gamepad2.a) {
