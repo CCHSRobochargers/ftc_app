@@ -80,33 +80,33 @@ public class TeleOp4507 extends OpMode {
 
     @Override
     public void loop() {
-        double lSP = gamepad1.left_stick_y;
-        double rSP = gamepad1.right_stick_y;
+        double lSP = -gamepad1.left_stick_y;
+        double rSP = -gamepad1.right_stick_y;
         double sw = gamepad2.left_stick_y;
         double cap = gamepad2.right_stick_y;
 
 
-        lSP = Range.clip(lSP, -0.6, 0.6);
-        rSP = Range.clip(rSP, -0.6, 0.6);
+        lSP = Range.clip(lSP, -1.0, 1.0);
+        rSP = Range.clip(rSP, -1.0, 1.0);
         sw = Range.clip(sw, -1.0, 1.0);
         cap = Range.clip(cap, -1.0, 1.0);
 
         if (gamepad1.dpad_up) {
-            lSP = -0.2;
-            rSP = -0.2;
+            lSP = 0.1;
+            rSP = 0.1;
         } else if (gamepad1.dpad_down) {
-            lSP = 0.2;
-            rSP = 0.2;
+            lSP = -0.1;
+            rSP = -0.1;
         }
 
         if (gamepad2.a) {
             sweeper.setPower(sw);
         }
 
-        if (gamepad2.x && currentK == Kick.IDLE && currentI == Index.IDLE && !gamepad1.a) {
+        if (gamepad2.x && (currentK == Kick.IDLE) && (currentI == Index.IDLE) && !gamepad1.a) {
             chooseI = Index.INDEXSTART;
         }
-        if (gamepad1.a && currentK == Kick.IDLE && currentI == Index.IDLE && !gamepad2.x) {
+        if (gamepad1.a && (currentK == Kick.IDLE) && (currentI == Index.IDLE) && !gamepad2.x) {
             chooseK = Kick.KICKSTART;
         }
 
@@ -201,5 +201,8 @@ public class TeleOp4507 extends OpMode {
         telemetry.addData("index", currentI.toString());
         telemetry.addData("indexer", indexer.getPosition());
         updateTelemetry(telemetry);
+    }
+
+    public void stop() {
     }
 }
