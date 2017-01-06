@@ -92,11 +92,11 @@ public class TeleOp4507 extends OpMode {
         cap = Range.clip(cap, -1.0, 1.0);
 
         if (gamepad1.dpad_up) {
-            lSP = 0.1;
-            rSP = 0.1;
+            lSP = 0.2;
+            rSP = 0.2;
         } else if (gamepad1.dpad_down) {
-            lSP = -0.1;
-            rSP = -0.1;
+            lSP = -0.2;
+            rSP = -0.2;
         }
 
         if (gamepad2.a) {

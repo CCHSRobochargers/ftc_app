@@ -22,6 +22,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
@@ -102,6 +103,14 @@ public class Autonomous4507 extends LinearOpMode {
     boolean shootY;
     boolean shootN;
     boolean endMove = false;
+
+    void delay(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            Log.e("InterruptedException", e.toString());
+        }
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -193,6 +202,16 @@ public class Autonomous4507 extends LinearOpMode {
         supposedToBeHeading = gyro.getHeading();
         sweep(true);
         capBallLock.setPosition(0.5);
+//        delay(10000);
+//        leftDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        rightDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        leftDrive.setPower(1.0);
+//        rightDrive.setPower(1.0);
+//        delay(4000);
+//        rightDrive.setPower(0.0);
+//        leftDrive.setPower(0.0);
         driveStraight(24, 1.0, 450);
         /**/
         shoot(shootY ? 2 : 0);
@@ -248,7 +267,7 @@ public class Autonomous4507 extends LinearOpMode {
         while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive() && !endMove) {
             for (int j = 0; j < distances.length; j++) {
                 distances[j] = range.getDistance(DistanceUnit.INCH);
-                range.wait(10);
+                sleep(75);
             }
             Arrays.sort(distances);
             rangeInches = distances[4];
@@ -404,9 +423,11 @@ public class Autonomous4507 extends LinearOpMode {
         while (!stop && opModeIsActive()) {
             if (red) {
                 if (bColor.red() > bColor.blue()) {
+                    Log.i("Stopped at red", "Yay");
                     try {
                         driveStraight(-3, 0.5, 200);
                     } catch (InterruptedException e) {
+                        Log.e("ColorError", e.toString());
                     }
                     leftDrive.setPower(0.0);
                     rightDrive.setPower(0.0);
@@ -414,11 +435,17 @@ public class Autonomous4507 extends LinearOpMode {
                 }
             } else if (!red) {
                 if (bColor.blue() > bColor.red()) {
+                    Log.i("Stopped at blue", "Yay");
                     leftDrive.setPower(0.0);
                     rightDrive.setPower(0.0);
                     stop = true;
                 }
             }
+            telemetry.addData("BlueVal", bColor.blue());
+            telemetry.addData("RedVal", bColor.red());
+            telemetry.addData("ColorVal", bColor.argb());
+            updateTelemetry(telemetry);
+            Log.i("ColorVal", String.valueOf(bColor.argb()));
             idle();
         }
         beaconPusher.setPosition(0.0);
@@ -446,18 +473,30 @@ public class Autonomous4507 extends LinearOpMode {
             if (red ? leftDrive.getCurrentPosition() > target : leftDrive.getCurrentPosition() < target) {
                 if (red) {
                     if (bColor.red() > bColor.blue()) {
+                        Log.i("Stopped at red", "Yay");
+                        try {
+                            driveStraight(-3, 0.5, 200);
+                        } catch (InterruptedException e) {
+                            Log.e("ColorError", e.toString());
+                        }
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
                         stop = true;
                     }
                 } else if (!red) {
                     if (bColor.blue() > bColor.red()) {
+                        Log.i("Stopped at blue", "Yay");
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
                         stop = true;
                     }
                 }
             }
+            telemetry.addData("BlueVal", bColor.blue());
+            telemetry.addData("RedVal", bColor.red());
+            telemetry.addData("ColorVal", bColor.argb());
+            updateTelemetry(telemetry);
+            Log.i("ColorVal", String.valueOf(bColor.argb()));
             idle();
         }
         beaconPusher.setPosition(0.0);
