@@ -2,37 +2,18 @@
  * Created by 4507 Robochargers on
  *          9/ 10/ 16
  *
- *9/10/16:
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
- *
  */
 package org.firstinspires.ftc.teamcode;
 
-import android.graphics.Color;
 import android.util.Log;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DeviceInterfaceModule;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -51,15 +32,6 @@ import java.util.Arrays;
 //@Disabled
 public class Autonomous4507 extends LinearOpMode {
 
-    // TODO: Need to test everything new
-    // TODO: (Which is practically everything)
-    // TODO: Look and fix code at other "TODO:" statements
-
-    // Device Interface Module
-//    DeviceInterfaceModule dim;
-//    final int BLUE_LED_CHANNEL = 0;
-//    final i
-// nt RED_LED_CHANNEL = 1;
     // DcMotor
     DcMotor leftDrive;
     DcMotor rightDrive;
@@ -86,13 +58,6 @@ public class Autonomous4507 extends LinearOpMode {
     // Global State Vaiables
     int countsPerYard = 2867;
     int countsPer4Donuts = 17000;
-    double fastSpeed;
-    double mediumSpeed;
-    double slowSpeed;
-    long fastSpDelay;
-    long slowSpDelay;
-    int rangeCounter = 0;
-
     // These variables are for autonomous.
     boolean red;
     boolean blue;
@@ -132,7 +97,7 @@ public class Autonomous4507 extends LinearOpMode {
         sweeper.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         // Servos
         indexer = hardwareMap.servo.get("ind");
-        indexer.setPosition(0.8);
+        indexer.setPosition(.35);
         beaconPusher = hardwareMap.servo.get("bPu");
         beaconPusher.setPosition(0.5);
         capBallLock = hardwareMap.servo.get("cBL");

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -8,8 +10,11 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.hardware.UltrasonicSensor;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import java.util.Iterator;
 
 @TeleOp(name="Teleop", group="4507")
 //@Disabled
@@ -45,6 +50,10 @@ public class TeleOp4507 extends OpMode {
     TouchSensor kickerStop;
     TouchSensor indexStart;
 
+    static final int NUM_MOTOR_CONTROLLERS = 3;
+    double[] minV = new double[NUM_MOTOR_CONTROLLERS];
+//    double[] maxV = new double[NUM_MOTOR_CONTROLLERS];
+
     @Override
     public void init() {
         currentK = Kick.IDLE;
@@ -68,7 +77,7 @@ public class TeleOp4507 extends OpMode {
         capper.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         indexer = hardwareMap.servo.get("ind");
-        indexer.setPosition(0.8);
+        indexer.setPosition(0.35);
         beaconPusher = hardwareMap.servo.get("bPu");
         beaconPusher.setPosition(0.5);
         capBallLock = hardwareMap.servo.get("cBL");
@@ -76,6 +85,13 @@ public class TeleOp4507 extends OpMode {
 
         kickerStop = hardwareMap.touchSensor.get("kT");
         indexStart = hardwareMap.touchSensor.get("iT");
+
+        Iterator<VoltageSensor> vSensorItr = hardwareMap.voltageSensor.iterator();
+        for (int j = 0; j < NUM_MOTOR_CONTROLLERS && vSensorItr.hasNext(); j++) {
+            VoltageSensor v = vSensorItr.next();
+            minV[j] = v.getVoltage();
+            Log.e("4507", String.format("minV[%d] %f", j, v.getVoltage()));
+        }
     }
 
     @Override
@@ -182,24 +198,34 @@ public class TeleOp4507 extends OpMode {
                 break;
 
             case INDEXSTART:
-                indexer.setPosition(0.63);
+                indexer.setPosition(0.18);
                 currentI = Index.DELAYSTART;
                 nextI = Index.INDEXEND;
                 delayTimeI = 300;
                 break;
 
             case INDEXEND:
-                indexer.setPosition(0.8);
+                indexer.setPosition(0.35);
                 currentI = Index.IDLE;
                 chooseI = Index.IDLE;
                 break;
         }
 
-        telemetry.addData("left", leftDrive.getCurrentPosition());
-        telemetry.addData("right", rightDrive.getCurrentPosition());
-        telemetry.addData("kick", currentK.toString());
-        telemetry.addData("index", currentI.toString());
-        telemetry.addData("indexer", indexer.getPosition());
+        Iterator<VoltageSensor> vSensorItr = hardwareMap.voltageSensor.iterator();
+        for (int j = 0; j < NUM_MOTOR_CONTROLLERS && vSensorItr.hasNext(); j++) {
+            VoltageSensor v = vSensorItr.next();
+            if (v.getVoltage() < minV[j]) {
+                minV[j] = v.getVoltage();
+                Log.e("4507", String.format("minV[%d] %f", j, v.getVoltage()));
+            }
+            telemetry.addData("minV", minV[j]);
+        }
+
+//        telemetry.addData("left", leftDrive.getCurrentPosition());
+//        telemetry.addData("right", rightDrive.getCurrentPosition());
+//        telemetry.addData("kick", currentK.toString());
+//        telemetry.addData("index", currentI.toString());
+//        telemetry.addData("indexer", indexer.getPosition());
         updateTelemetry(telemetry);
     }
 
