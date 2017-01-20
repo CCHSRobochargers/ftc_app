@@ -221,8 +221,7 @@ public class TeleOp4507 extends OpMode {
             telemetry.addData("minV", minV[j]);
         }
 
-//        telemetry.addData("left", leftDrive.getCurrentPosition());
-//        telemetry.addData("right", rightDrive.getCurrentPosition());
+        telemetry.addData("right", rightDrive.getCurrentPosition());
 //        telemetry.addData("kick", currentK.toString());
 //        telemetry.addData("index", currentI.toString());
 //        telemetry.addData("indexer", indexer.getPosition());

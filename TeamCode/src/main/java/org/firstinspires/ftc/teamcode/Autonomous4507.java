@@ -58,24 +58,18 @@ public class Autonomous4507 extends LinearOpMode {
     // Global State Vaiables
     int countsPerYard = 2867;
     int countsPer4Donuts = 17000;
+    double rangeInches = 0.0;
     // These variables are for autonomous.
     boolean red;
     boolean blue;
     boolean diagTile;
     boolean straightTile;
-    boolean beaconY;
-    boolean beaconN;
-    boolean shootY;
+    boolean beaconY = true;
+    boolean beaconN = false;
+    boolean shootY = true;
     boolean shootN;
     boolean endMove = false;
 
-    void delay(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            Log.e("InterruptedException", e.toString());
-        }
-    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -134,16 +128,18 @@ public class Autonomous4507 extends LinearOpMode {
             beaconY = false;
             beaconN = true;
         }
-        if (shootSw.getState()) { //d3
-            shootY = false;
-            shootN = true;
-        } else if (!shootSw.getState()) {
-            shootY = true;
-            shootN = false;
-        }
+//        if (shootSw.getState()) { //d3
+//            shootY = false;
+//            shootN = true;
+//        } else if (!shootSw.getState()) {
+//            shootY = true;
+//            shootN = false;
+//        }
 //        // Elapsed Time
 //        elapsedTime = new ElapsedTime();
+        Log.i("red?", String.valueOf(red));
         gyro.calibrate();
+        Log.i("Gyro Status:", "Calibrating...");
         while (gyro.isCalibrating() && !isStarted()) {
             idle();
         }
@@ -151,9 +147,10 @@ public class Autonomous4507 extends LinearOpMode {
 //            dim.setLED(RED_LED_CHANNEL, false);
 //            dim.setLED(BLUE_LED_CHANNEL, true);
         }
-
+        Log.i("Gyro Status:", "Calibrated Successfully!");
         // Wait for the robot to start
         waitForStart();
+
 
 
         while (gyro.isCalibrating() && opModeIsActive()) {
@@ -179,43 +176,73 @@ public class Autonomous4507 extends LinearOpMode {
 //        leftDrive.setPower(0.0);
         driveStraight(24, 1.0, 450);
         /**/
-        shoot(shootY ? 2 : 0);
-        if (beaconY) {
+        shoot(shootY ?  2 : 0);
+        if (beaconY && opModeIsActive()) {
             driveTurn(red ? -55 : 55, 0.75, 200);
+            if (!opModeIsActive()) {
+                return;
+            }
             driveStraight(red ? 22 : 32, 1.0, 100);
+            if (!opModeIsActive()) {
+                return;
+            }
             driveTurn(red ? -45 : 40, 0.75, 200);
-            driveStraight(red ? 28 : 30, red ? 8 : 8, 1.0, 100);
+            if (!opModeIsActive()) {
+                return;
+            }
+            driveStraight(30, 8, 1.0, 100);
+            if (!opModeIsActive()) {
+                return;
+            }
             driveTurn(90, 0.75, 100);
+            if (!opModeIsActive()) {
+                return;
+            }
             driveTurnWithGyro(supposedToBeHeading);
-            if (red) {
-                driveTurn(5, 0.5, 200);
+            if (!opModeIsActive()) {
+                return;
             }
             beacon(red ? 0.50 : -1.0, false, 500);
-            beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
-        } else if (!beaconY) {
+            if (!opModeIsActive()) {
+                return;
+            }
+//            beacon(red ? 12.0 : -12.0, red ? 1.0 : -1.0, false, 100);
+            driveStraight(36, 1.0, 450);
+            if (!opModeIsActive()) {
+                return;
+            }
+            beacon(0.4, true, 450);
+            if (!opModeIsActive()) {
+                return;
+            }
+        } else if (!beaconY && opModeIsActive()) {
             driveTurn(red ? 10 : -10, 1.0, 200);
 //            driveTurn(red ? -45 : 45, 0.75, 200);
-//            driveStraight(25, 1.0, 100);
-//            driveTurn(red ? 80 : -80, 0.75, 200);
+//            driveStraig2
+// +
+// +ht(25, 1.0, 100);.0
+
+//            driveTurn( red ? 80 : -80, 0.75, 200);
 //            driveStraight(17, 1.0, 100);
 //            driveTurn(red ? 100 : -100, 0.75, 200);
 //            driveStraight(12, 1.0, 100);
 //            driveTurn(red ? 90 : -90, 0.75, 100);
 //            driveStraight(60, 1.0, 100);
             driveStraight(24, 1.0, 100);
+            if (!opModeIsActive()) {
+                return;
+            }
             driveTurn(red ? 55 : -55, 1.0, 200);
+            if (!opModeIsActive()) {
+                return;
+            }
             driveStraight(-72, 1.0, 100);
+            if (!opModeIsActive()) {
+                return;
+            }
         }
         sweep(false);
     }
-
-
-
-
-
-
-
-
 
     public void driveStraight(double approxInches, double rangeInches, double speed, long delayMillis) throws InterruptedException {
         boolean endMove = false;
@@ -232,13 +259,17 @@ public class Autonomous4507 extends LinearOpMode {
         while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive() && !endMove) {
             for (int j = 0; j < distances.length; j++) {
                 distances[j] = range.getDistance(DistanceUnit.INCH);
+                Log.i("Rangeval", String.valueOf(distances[j]));
                 sleep(75);
             }
             Arrays.sort(distances);
-            rangeInches = distances[4];
+            this.rangeInches = distances[4];
             idle();
-            telemetry.addData("range", rangeInches);
+            telemetry.addData("range", distances[4]);
             updateTelemetry(telemetry);
+            if (this.rangeInches <= rangeInches) {
+                endMove = true;
+            }
         }
 
         leftDrive.setPower(0.0);
@@ -370,7 +401,6 @@ public class Autonomous4507 extends LinearOpMode {
     }
 
     /**
-     * TODO: This is going to be an absolute pain in the butt
      * @param speed is the speed to go
      * @param colorRed is whether or not we are looking for red
      */
@@ -386,8 +416,10 @@ public class Autonomous4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while (!stop && opModeIsActive()) {
+            int redVal = bColor.red();
+            int blueVal = bColor.blue();
             if (red) {
-                if (bColor.red() > bColor.blue()) {
+                if (redVal > blueVal) {
                     Log.i("Stopped at red", "Yay");
                     try {
                         driveStraight(-3, 0.5, 200);
@@ -398,25 +430,29 @@ public class Autonomous4507 extends LinearOpMode {
                     rightDrive.setPower(0.0);
                     stop = true;
                 }
-            } else if (!red) {
-                if (bColor.blue() > bColor.red()) {
+            } else {
+                if (blueVal > redVal) {
                     Log.i("Stopped at blue", "Yay");
                     leftDrive.setPower(0.0);
                     rightDrive.setPower(0.0);
                     stop = true;
                 }
             }
-            telemetry.addData("BlueVal", bColor.blue());
-            telemetry.addData("RedVal", bColor.red());
+            telemetry.addData("BlueVal", blueVal);
+            telemetry.addData("RedVal", redVal);
             telemetry.addData("ColorVal", bColor.argb());
             updateTelemetry(telemetry);
             Log.i("ColorVal", String.valueOf(bColor.argb()));
+            Log.i("RedVal", String.valueOf(redVal));
+            Log.i("BlueVal", String.valueOf(blueVal));
             idle();
         }
-        beaconPusher.setPosition(0.0);
-        sleep(2500);
         beaconPusher.setPosition(1.0);
-        sleep(2500);
+        sleep(2000);
+        Log.i("Done Moving", "OUT");
+        beaconPusher.setPosition(0.0);
+        sleep(2000);
+        Log.i("Done Moving", "IN");
         beaconPusher.setPosition(0.5);
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -427,7 +463,7 @@ public class Autonomous4507 extends LinearOpMode {
         boolean stop = false;
         int target = leftDrive.getCurrentPosition() - (int)(-distB4Press * countsPerYard / 36);
 
-        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftDrive.setMode(DcMotor.RunMode .RUN_USING_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
@@ -435,9 +471,11 @@ public class Autonomous4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while (!stop && opModeIsActive()) {
-            if (red ? leftDrive.getCurrentPosition() > target : leftDrive.getCurrentPosition() < target) {
+            int redVal = bColor.red();
+            int blueVal = bColor.blue();
+            if (red ? (leftDrive.getCurrentPosition() > target) : (leftDrive.getCurrentPosition() < target)) {
                 if (red) {
-                    if (bColor.red() > bColor.blue()) {
+                    if (redVal > blueVal) {
                         Log.i("Stopped at red", "Yay");
                         try {
                             driveStraight(-3, 0.5, 200);
@@ -448,8 +486,8 @@ public class Autonomous4507 extends LinearOpMode {
                         rightDrive.setPower(0.0);
                         stop = true;
                     }
-                } else if (!red) {
-                    if (bColor.blue() > bColor.red()) {
+                } else {
+                    if (blueVal > redVal) {
                         Log.i("Stopped at blue", "Yay");
                         leftDrive.setPower(0.0);
                         rightDrive.setPower(0.0);
@@ -462,12 +500,16 @@ public class Autonomous4507 extends LinearOpMode {
             telemetry.addData("ColorVal", bColor.argb());
             updateTelemetry(telemetry);
             Log.i("ColorVal", String.valueOf(bColor.argb()));
+            Log.i("RedVal", String.valueOf(bColor.red()));
+            Log.i("BlueVal", String.valueOf(bColor.blue()));
             idle();
         }
-        beaconPusher.setPosition(0.0);
-        sleep(2500);
         beaconPusher.setPosition(1.0);
-        sleep(2500);
+        sleep(2000);
+        Log.i("Done Moving", "OUT");
+        beaconPusher.setPosition(0.0);
+        sleep(2000);
+        Log.i("Done Moving", "IN");
         beaconPusher.setPosition(0.5);
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -503,7 +545,7 @@ public class Autonomous4507 extends LinearOpMode {
      */
 
     public void index() {
-        indexer.setPosition(0.63);
+        indexer.setPosition(0.18);
         sleep(500);
     }
 
