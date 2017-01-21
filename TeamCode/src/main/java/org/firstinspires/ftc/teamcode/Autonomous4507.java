@@ -58,7 +58,6 @@ public class Autonomous4507 extends LinearOpMode {
     // Global State Vaiables
     int countsPerYard = 2867;
     int countsPer4Donuts = 17000;
-    double rangeInches = 0.0;
     // These variables are for autonomous.
     boolean red;
     boolean blue;
@@ -190,7 +189,7 @@ public class Autonomous4507 extends LinearOpMode {
             if (!opModeIsActive()) {
                 return;
             }
-            driveStraight(30, 8, 1.0, 100);
+            driveStraight(30, 14, 1.0, 100);
             if (!opModeIsActive()) {
                 return;
             }
@@ -202,7 +201,7 @@ public class Autonomous4507 extends LinearOpMode {
             if (!opModeIsActive()) {
                 return;
             }
-            beacon(red ? 0.50 : -1.0, false, 500);
+            beacon(red ? 0.3 : -1.0, false, 500);
             if (!opModeIsActive()) {
                 return;
             }
@@ -248,7 +247,7 @@ public class Autonomous4507 extends LinearOpMode {
         boolean endMove = false;
         int lTarget = leftDrive.getCurrentPosition() - (int)(-approxInches * (countsPerYard / 36.0) - 6);
         int rTarget = rightDrive.getCurrentPosition() - (int)(-approxInches * (countsPerYard / 36.0) - 6);
-        double[] distances = new double[9];
+//        double[] distances = new double[9];
 
         leftDrive.setTargetPosition(lTarget);
         rightDrive.setTargetPosition(rTarget);
@@ -257,21 +256,22 @@ public class Autonomous4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive() && !endMove) {
-            for (int j = 0; j < distances.length; j++) {
-                distances[j] = range.getDistance(DistanceUnit.INCH);
-                Log.i("Rangeval", String.valueOf(distances[j]));
-                sleep(75);
-            }
-            Arrays.sort(distances);
-            this.rangeInches = distances[4];
+//            for (int j = 0; j < distances.length; j++) {
+//                distances[j] = range.getDistance(DistanceUnit.INCH);
+//                Log.i("Rangeval", String.valueOf(distances[j]));
+//                sleep(75);
+//            }
+//            Arrays.sort(distances);
             idle();
-            telemetry.addData("range", distances[4]);
+            double rngInches = range.getDistance(DistanceUnit.INCH);
+            Log.i("range", Double.toString(rngInches));
             updateTelemetry(telemetry);
-            if (this.rangeInches <= rangeInches) {
+            if ((rngInches > 3.0) && (rngInches <= rangeInches)) {
                 endMove = true;
+                leftDrive.setPower(0.0);
+                rightDrive.setPower(0.0);
             }
         }
-
         leftDrive.setPower(0.0);
         rightDrive.setPower(0.0);
         sleep(delayMillis);
@@ -421,11 +421,11 @@ public class Autonomous4507 extends LinearOpMode {
             if (red) {
                 if (redVal > blueVal) {
                     Log.i("Stopped at red", "Yay");
-                    try {
-                        driveStraight(-3, 0.5, 200);
-                    } catch (InterruptedException e) {
-                        Log.e("ColorError", e.toString());
-                    }
+//                    try {
+//                        driveStraight(-3, 0.5, 200);
+//                    } catch (InterruptedException e) {
+//                        Log.e("ColorError", e.toString());
+//                    }
                     leftDrive.setPower(0.0);
                     rightDrive.setPower(0.0);
                     stop = true;
