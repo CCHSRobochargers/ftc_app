@@ -40,6 +40,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.net.wifi.WifiManager;
@@ -47,6 +48,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -97,6 +99,8 @@ import java.io.File;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.firstinspires.ftc.robotcontroller.internal.AutoConfig;
+
 public class FtcRobotControllerActivity extends Activity {
 
   public static final String TAG = "RCActivity";
@@ -125,6 +129,8 @@ public class FtcRobotControllerActivity extends Activity {
   protected TextView textOpMode;
   protected TextView textErrorMessage;
   protected ImmersiveMode immersion;
+
+  protected View relativeLayout;
 
   protected UpdateUI updateUI;
   protected Dimmer dimmer;
@@ -236,6 +242,10 @@ public class FtcRobotControllerActivity extends Activity {
     textErrorMessage = (TextView) findViewById(R.id.textErrorMessage);
     textGamepad[0] = (TextView) findViewById(R.id.textGamepad1);
     textGamepad[1] = (TextView) findViewById(R.id.textGamepad2);
+
+    relativeLayout = findViewById(R.id.RelativeLayout);
+    relativeLayout.setBackgroundColor(Color.rgb(255, 125, 125));
+
     immersion = new ImmersiveMode(getWindow().getDecorView());
     dimmer = new Dimmer(this);
     dimmer.longBright();
@@ -439,6 +449,13 @@ public class FtcRobotControllerActivity extends Activity {
     else if (id == R.id.action_settings) {
       Intent settingsIntent = new Intent(FtcRobotControllerSettingsActivity.launchIntent);
       startActivityForResult(settingsIntent, LaunchActivityConstantsList.FTC_CONFIGURE_REQUEST_CODE_ROBOT_CONTROLLER);
+      return true;
+    }
+    else if (id == R.id.action_change_alliance_color) {
+
+      AutoConfig.redAlliance = !AutoConfig.redAlliance;
+      relativeLayout.setBackgroundColor(Color.rgb(AutoConfig.redAlliance ? 255 : 125, 125, AutoConfig.redAlliance ? 125 : 255));
+      Log.i("Alliance Color", AutoConfig.redAlliance ? " Red" : " Blue");
       return true;
     }
     else if (id == R.id.action_about) {

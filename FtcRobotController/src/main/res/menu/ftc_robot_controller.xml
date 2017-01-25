@@ -75,6 +75,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     android:title="@string/about_menu_item"/>
 
   <item
+    android:id="@+id/action_change_alliance_color"
+    android:orderInCategory="998"
+    android:title="@string/allycolor_menu_item" />
+
+  <item
     android:id="@+id/action_exit_app"
     android:orderInCategory="1000"
     android:icon="@android:drawable/ic_menu_info_details"
