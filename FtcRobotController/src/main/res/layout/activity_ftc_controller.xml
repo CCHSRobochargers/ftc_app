@@ -148,6 +148,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     </FrameLayout>
 
     <TextView
+        android:id="@+id/beaconMess"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textGamepad1"
+        android:visibility="invisible"
+        android:text=""/>
+
+    <TextView
       android:id="@+id/textGamepad1"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"

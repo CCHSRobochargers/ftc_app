@@ -73,11 +73,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     android:orderInCategory="999"
     android:icon="@android:drawable/ic_menu_info_details"
     android:title="@string/about_menu_item"/>
-
+<!--
   <item
     android:id="@+id/action_change_alliance_color"
     android:orderInCategory="998"
     android:title="@string/allycolor_menu_item" />
+-->
+
+  <item
+    android:id="@+id/switching"
+    android:title="@string/switches">
+    <menu>
+      <item
+          android:id="@+id/alliancecolor"
+          android:title="@string/allycolor_menu_item" />
+      <item
+          android:id="@+id/beaconyn"
+          android:title="@string/beaconyn_menu_item" />
+    </menu>
+
+  </item>
 
   <item
     android:id="@+id/action_exit_app"

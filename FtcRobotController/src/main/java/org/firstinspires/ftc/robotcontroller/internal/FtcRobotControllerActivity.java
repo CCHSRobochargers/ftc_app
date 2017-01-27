@@ -126,6 +126,7 @@ public class FtcRobotControllerActivity extends Activity {
   protected TextView textNetworkConnectionStatus;
   protected TextView textRobotStatus;
   protected TextView[] textGamepad = new TextView[NUM_GAMEPADS];
+  protected TextView textbeaconYN;
   protected TextView textOpMode;
   protected TextView textErrorMessage;
   protected ImmersiveMode immersion;
@@ -240,6 +241,7 @@ public class FtcRobotControllerActivity extends Activity {
     textRobotStatus = (TextView) findViewById(R.id.textRobotStatus);
     textOpMode = (TextView) findViewById(R.id.textOpMode);
     textErrorMessage = (TextView) findViewById(R.id.textErrorMessage);
+    textbeaconYN = (TextView) findViewById(R.id.beaconyn);
     textGamepad[0] = (TextView) findViewById(R.id.textGamepad1);
     textGamepad[1] = (TextView) findViewById(R.id.textGamepad2);
 
@@ -451,10 +453,24 @@ public class FtcRobotControllerActivity extends Activity {
       startActivityForResult(settingsIntent, LaunchActivityConstantsList.FTC_CONFIGURE_REQUEST_CODE_ROBOT_CONTROLLER);
       return true;
     }
-    else if (id == R.id.action_change_alliance_color) {
-
+//    else if (id == R.id.action_change_alliance_color) {
+//
+//      AutoConfig.redAlliance = !AutoConfig.redAlliance;
+//      relativeLayout.setBackgroundColor(Color.rgb(AutoConfig.redAlliance ? 255 : 125, 125, AutoConfig.redAlliance ? 125 : 255));
+//      Log.i("Alliance Color", AutoConfig.redAlliance ? " Red" : " Blue");
+//      return true;
+//    }
+    else if (id == R.id.beaconyn) {
+      AutoConfig.doBeacon = !AutoConfig.doBeacon;
+//      textbeaconYN.setText(AutoConfig.doBeacon ? R.string.beaconyes : R.string.beaconno);
+      AppUtil.getInstance().showToast(context, context.getString(AutoConfig.doBeacon ? R.string.beaconY : R.string.beaconN));
+      Log.i("Beacon Y/N", AutoConfig.doBeacon ? "Yes" : "No");
+      return true;
+    }
+    else if (id== R.id.alliancecolor) {
       AutoConfig.redAlliance = !AutoConfig.redAlliance;
       relativeLayout.setBackgroundColor(Color.rgb(AutoConfig.redAlliance ? 255 : 125, 125, AutoConfig.redAlliance ? 125 : 255));
+      AppUtil.getInstance().showToast(context, context.getString(AutoConfig.redAlliance ? R.string.red : R.string.blue));
       Log.i("Alliance Color", AutoConfig.redAlliance ? " Red" : " Blue");
       return true;
     }

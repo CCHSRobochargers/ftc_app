@@ -113,6 +113,12 @@ public class TeleOp4507 extends OpMode {
         } else if (gamepad1.dpad_down) {
             lSP = -0.2;
             rSP = -0.2;
+        } else if (gamepad1.dpad_right) {
+            lSP = -0.2;
+            rSP = 0.2;
+        } else if (gamepad1.dpad_left) {
+            lSP = 0.2;
+            rSP = -0.2;
         }
 
         if (gamepad2.a) {
@@ -222,6 +228,7 @@ public class TeleOp4507 extends OpMode {
         }
 
         telemetry.addData("right", rightDrive.getCurrentPosition());
+        telemetry.addData("left", leftDrive.getCurrentPosition());
 //        telemetry.addData("kick", currentK.toString());
 //        telemetry.addData("index", currentI.toString());
 //        telemetry.addData("indexer", indexer.getPosition());
