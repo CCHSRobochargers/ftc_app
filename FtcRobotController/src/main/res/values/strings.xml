@@ -49,7 +49,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <string name="configure_robot_menu_item">Configure Robot</string>
   <string name="about_menu_item">About</string>
   <string name="allycolor_menu_item">Change Alliance Color</string>
-  <string name="beaconyn_menu_item">Change Beacon Y/N</string>
+  <string name="beaconyn_menu_item">Get Beacons</string>
   <string name="switches">Digital Switch</string>
   <string name="exit_menu_item">Exit</string>
 
@@ -63,9 +63,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <string name="pref_view_logs">View Logs</string>
   <string name="pref_sound_on_off_title">Sound</string>
 
-  <!-- Toast messages -->  
+  <!-- Toast messages -->
   <string name="toastWifiConfigurationComplete">Configuration Complete</string>
   <string name="toastRestartingRobot">Restarting Robot</string>
   <string name="toastConfigureRobotBeforeProgrammingMode">You must Configure Robot before starting Programming Mode.</string>
 
+  <string name="switchHead">Switches</string>
+  <string name="switchBack">BACK</string>
+  <string name="redName">Red</string>
+  <string name="blueName">Blue</string>
 </resources>

@@ -241,12 +241,16 @@ public class FtcRobotControllerActivity extends Activity {
     textRobotStatus = (TextView) findViewById(R.id.textRobotStatus);
     textOpMode = (TextView) findViewById(R.id.textOpMode);
     textErrorMessage = (TextView) findViewById(R.id.textErrorMessage);
-    textbeaconYN = (TextView) findViewById(R.id.beaconyn);
+    TextView colorView = (TextView) findViewById(R.id.colorDisplay);
+    TextView beaconView = (TextView) findViewById(R.id.beaconDisplay);
+    colorView.setText(AutoConfig.redAlliance ? R.string.red : R.string.blue);
+    beaconView.setText(AutoConfig.doBeacon ? R.string.beaconY : R.string.beaconN);
     textGamepad[0] = (TextView) findViewById(R.id.textGamepad1);
     textGamepad[1] = (TextView) findViewById(R.id.textGamepad2);
 
-    relativeLayout = findViewById(R.id.RelativeLayout);
-    relativeLayout.setBackgroundColor(Color.rgb(255, 125, 125));
+
+//    relativeLayout = findViewById(R.id.RelativeLayout);
+//    relativeLayout.setBackgroundColor(Color.rgb(255, 125, 125));
 
     immersion = new ImmersiveMode(getWindow().getDecorView());
     dimmer = new Dimmer(this);
@@ -460,19 +464,23 @@ public class FtcRobotControllerActivity extends Activity {
 //      Log.i("Alliance Color", AutoConfig.redAlliance ? " Red" : " Blue");
 //      return true;
 //    }
-    else if (id == R.id.beaconyn) {
-      AutoConfig.doBeacon = !AutoConfig.doBeacon;
-//      textbeaconYN.setText(AutoConfig.doBeacon ? R.string.beaconyes : R.string.beaconno);
-      AppUtil.getInstance().showToast(context, context.getString(AutoConfig.doBeacon ? R.string.beaconY : R.string.beaconN));
-      Log.i("Beacon Y/N", AutoConfig.doBeacon ? "Yes" : "No");
-      return true;
-    }
-    else if (id== R.id.alliancecolor) {
-      AutoConfig.redAlliance = !AutoConfig.redAlliance;
-      relativeLayout.setBackgroundColor(Color.rgb(AutoConfig.redAlliance ? 255 : 125, 125, AutoConfig.redAlliance ? 125 : 255));
-      AppUtil.getInstance().showToast(context, context.getString(AutoConfig.redAlliance ? R.string.red : R.string.blue));
-      Log.i("Alliance Color", AutoConfig.redAlliance ? " Red" : " Blue");
-      return true;
+//    else if (id == R.id.beaconyn) {
+//      AutoConfig.doBeacon = !AutoConfig.doBeacon;
+////      textbeaconYN.setText(AutoConfig.doBeacon ? R.string.beaconyes : R.string.beaconno);
+//      AppUtil.getInstance().showToast(context, context.getString(AutoConfig.doBeacon ? R.string.beaconY : R.string.beaconN));
+//      Log.i("Beacon Y/N", AutoConfig.doBeacon ? "Yes" : "No");
+//      return true;
+//    }
+//    else if (id== R.id.alliancecolor) {
+//      AutoConfig.redAlliance = !AutoConfig.redAlliance;
+//      relativeLayout.setBackgroundColor(Color.rgb(AutoConfig.redAlliance ? 255 : 125, 125, AutoConfig.redAlliance ? 125 : 255));
+//      AppUtil.getInstance().showToast(context, context.getString(AutoConfig.redAlliance ? R.string.red : R.string.blue));
+//      Log.i("Alliance Color", AutoConfig.redAlliance ? " Red" : " Blue");
+//      return true;
+//    }
+    else if (id == R.id.switching) {
+      Intent intent = new Intent(this, SwitchActivity.class);
+      startActivity(intent);
     }
     else if (id == R.id.action_about) {
       Intent intent = new Intent(AboutActivity.launchIntent);

@@ -432,8 +432,8 @@ public class Autonomous4507 extends LinearOpMode {
             if (pre + 1000 < now) {
                 exitTurn = true;
             }
-            leftDrive.setPower(Range.clip(0 - (0.04 + (gyroError * 0.03)), -0.25, 0.25));
-            rightDrive.setPower(Range.clip(0 + (0.04 + (gyroError * 0.03)), -0.25, 0.25));
+            leftDrive.setPower(Range.clip(0 - (0.04 + (gyroError * 0.03)), -1.0, 1.0));
+            rightDrive.setPower(Range.clip(0 + (0.04 + (gyroError * 0.03)), -1.0, 1.0));
             idle();
         }
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
