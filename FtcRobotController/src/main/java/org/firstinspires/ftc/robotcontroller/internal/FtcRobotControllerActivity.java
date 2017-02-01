@@ -241,10 +241,6 @@ public class FtcRobotControllerActivity extends Activity {
     textRobotStatus = (TextView) findViewById(R.id.textRobotStatus);
     textOpMode = (TextView) findViewById(R.id.textOpMode);
     textErrorMessage = (TextView) findViewById(R.id.textErrorMessage);
-    TextView colorView = (TextView) findViewById(R.id.colorDisplay);
-    TextView beaconView = (TextView) findViewById(R.id.beaconDisplay);
-    colorView.setText(AutoConfig.redAlliance ? R.string.red : R.string.blue);
-    beaconView.setText(AutoConfig.doBeacon ? R.string.beaconY : R.string.beaconN);
     textGamepad[0] = (TextView) findViewById(R.id.textGamepad1);
     textGamepad[1] = (TextView) findViewById(R.id.textGamepad2);
 
@@ -298,6 +294,11 @@ public class FtcRobotControllerActivity extends Activity {
 
     // Undo the effects of shutdownRobot() that we might have done in onStop()
     updateUIAndRequestRobotSetup();
+
+    TextView colorView = (TextView) findViewById(R.id.colorDisplay);
+    TextView beaconView = (TextView) findViewById(R.id.beaconDisplay);
+    colorView.setText(AutoConfig.redAlliance ? R.string.red : R.string.blue);
+    beaconView.setText(AutoConfig.doBeacon ? R.string.beaconY : R.string.beaconN);
 
     cfgFileMgr.getActiveConfigAndUpdateUI();
 
