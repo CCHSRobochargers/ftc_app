@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_switch"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="org.firstinspires.ftc.robotcontroller.internal.SwitchActivity">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="@string/switchHead"
+            android:textAllCaps="true"
+            android:textSize="20sp"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/switchBack"
+            android:layout_alignParentEnd="true"
+            android:onClick="goBack"/>
+
+
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ToggleButton
+            android:id="@+id/rBToggle"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:textOff="@string/blueName"
+            android:textOn="@string/redName"
+            android:layout_alignParentStart="true"
+            android:onClick="colorButton" />
+        <TextView
+            android:id="@+id/rbText"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:text="@string/allycolor_menu_item"
+            android:textSize="15sp"/>
+        <ToggleButton
+            android:id="@+id/bYNToggle"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/rBToggle"
+            android:onClick="beaconButton" />
+        <TextView
+            android:id="@+id/bYNText"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@+id/rbText"
+            android:text="@string/beaconyn_menu_item"
+            android:textSize="15sp"/>
+
+    </RelativeLayout>
+
+
+</LinearLayout>

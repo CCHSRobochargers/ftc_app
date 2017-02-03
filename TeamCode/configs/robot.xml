@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC">
+    <ServoController name="sCtlr" serialNumber="AL00VUK4">
+        <Servo name="ind" port="1" />
+	<Servo name="bPu" port="2" />
+	<Servo name="cBL" port="3" />
+    </ServoController>
+    <LegacyModuleController name="legacy" serialNumber="AL00XU9T">
+        <TouchSensor name="kT" port="0" />
+		<TouchSensor name="iT" port="5" />
+    </LegacyModuleController>
+    <DeviceInterfaceModule name="dim" serialNumber="AI02RHQD">
+        <ModernRoboticsI2cRangeSensor name="range" port="3" />
+        <Gyro name="gyro" port="4" />
+        <ColorSensor name="cS" port="5" />
+		<DigitalDevice name="tSw" port="0" />
+		<DigitalDevice name="cSw" port="1" />
+		<DigitalDevice name="bSw" port="2" />
+		<DigitalDevice name="sSw" port="3" />
+    </DeviceInterfaceModule>
+    <MotorController name="dtCtlr" serialNumber="AL00XTFA">
+        <Motor name="r" port="1" />
+        <Motor name="l" port="2" />
+    </MotorController>
+    <MotorController name="kSCtlr" serialNumber="AL00VXF8">
+        <Motor name="sweep" port="1" />
+        <Motor name="kick" port="2" />
+    </MotorController>
+    <MotorController name="capball" serialNumber="AL00VXRE">
+	<Motor name="cap" port="1" />
+    </MotorController>	
+</Robot>
