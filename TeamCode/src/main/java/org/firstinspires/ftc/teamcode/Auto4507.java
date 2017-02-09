@@ -47,9 +47,8 @@ public class Auto4507 extends LinearOpMode {
     int countsPer4Donuts = 18186;
     int countsPerDonut = countsPer4Donuts / 4;
     int countEndDelta = countsPerYard / 144;
-    static final double     HEADING_THRESHOLD       = 1 ;      // As tight as we can make it with an integer gyro
-    static final double     P_TURN_COEFF            = 0.1;     // Larger is more responsive, but also less stable
-
+    static double           HEADING_THRESHOLD       = 10.0;    // As tight as we can make it with an integer gyro
+    static final double     P_TURN_COEFF            = 0.025;    // Larger is more responsive, but also less stable
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -123,7 +122,8 @@ public class Auto4507 extends LinearOpMode {
             //Drive Turn parallel to tape lines
             if (opModeIsActive()) {
 //                driveTurn(red ? 45 : -45, 0.75, 500);
-                gyroTurn(0.75, red ? 45: -45);
+                currentHeading += red ? 45: -45;
+                gyroTurn(0.75, currentHeading);
             }
 
             //Drive forward
@@ -134,7 +134,8 @@ public class Auto4507 extends LinearOpMode {
             //Turn to wall
             if(opModeIsActive()) {
 //                driveTurn(red ? 45 : -45, 0.75, 500);
-                gyroTurn(0.75, red ? 45 : -45);
+                currentHeading += red ? 45: -45;
+                gyroTurn(0.75, currentHeading);
             }
 
             //Drive straight partially to wall
@@ -150,9 +151,9 @@ public class Auto4507 extends LinearOpMode {
             //Turn to Beacon
             if (opModeIsActive()) {
 //                driveTurn(red ? -90 : 90, 0.75, 500);
-                gyroTurn(0.75, red ? -90 : 90);
+                currentHeading += red ? -90: 90;
+                gyroTurn(0.75, currentHeading);
             }
-
 
             //Drive to first beacon
             if (opModeIsActive()) {
@@ -259,13 +260,24 @@ public class Auto4507 extends LinearOpMode {
 
     public void gyroTurn (  double speed, double angle) {
 
+        Log.i("gyroTurn angle", String.valueOf(angle));
+        Log.i("gyroTurn before", String.valueOf(gyro.getIntegratedZValue()));
         // keep looping while we are still active, and not on heading.
+        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
             // Update telemetry & Allow time for other processes to run.
             telemetry.update();
         }
+        Log.i("gyroTurn after", String.valueOf(gyro.getIntegratedZValue()));
 
-        gyroHold(speed, angle, 500);
+        double saveHeadingThreshold = HEADING_THRESHOLD;
+        HEADING_THRESHOLD = 1;
+        gyroHold(speed, angle, 1.0);
+        HEADING_THRESHOLD = saveHeadingThreshold;
+        Log.i("gyroTurn held", String.valueOf(gyro.getIntegratedZValue()));
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     boolean onHeading(double speed, double angle, double PCoeff) {
