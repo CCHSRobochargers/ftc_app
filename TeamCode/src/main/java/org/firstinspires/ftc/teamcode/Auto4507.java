@@ -47,8 +47,9 @@ public class Auto4507 extends LinearOpMode {
     int countsPer4Donuts = 18186;
     int countsPerDonut = countsPer4Donuts / 4;
     int countEndDelta = countsPerYard / 144;
-    static double           HEADING_THRESHOLD       = 10.0;    // As tight as we can make it with an integer gyro
+    static double           HEADING_THRESHOLD       = 10.0;    // Degrees that is close enough
     static final double     P_TURN_COEFF            = 0.025;    // Larger is more responsive, but also less stable
+    static final double     P_DRIVE_COEFF           = 0.2;     // Larger is more responsive, but also less stable
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -112,7 +113,7 @@ public class Auto4507 extends LinearOpMode {
 
         //Drive straight to shoot
         if (opModeIsActive()) {
-            driveStraight(24, 1.0, 500);
+            driveStraight(currentHeading, 24, 1.0, 500);
         }
 
         //Shoot twice
@@ -128,7 +129,7 @@ public class Auto4507 extends LinearOpMode {
 
             //Drive forward
             if (opModeIsActive()) {
-                driveStraight(26, 1.0, 500);
+                driveStraight(currentHeading, 26, 1.0, 500);
             }
 
             //Turn to wall
@@ -140,12 +141,12 @@ public class Auto4507 extends LinearOpMode {
 
             //Drive straight partially to wall
             if (opModeIsActive()) {
-                driveStraight(16, 1.0, 500);
+                driveStraight(currentHeading, 16, 1.0, 500);
             }
 
             //Drive straight to wall with range
             if (opModeIsActive()) {
-                driveStraight(8, 8, 0.4, 500);
+                driveStraight(currentHeading, 8, 8, 0.4, 500);
             }
 
             //Turn to Beacon
@@ -162,7 +163,7 @@ public class Auto4507 extends LinearOpMode {
 
             //Back up to button
 //            if (opModeIsActive()) {
-//                driveStraight(-2, 0.25, 500);
+//                driveStraight(currentHeading, -2, 0.25, 500);
 //            }
 
             //Wind in/out beacon pusher
@@ -172,7 +173,7 @@ public class Auto4507 extends LinearOpMode {
 
             //Drive forward between beacons
             if (opModeIsActive()) {
-                driveStraight(32, 1.0, 500);
+                driveStraight(currentHeading, 32, 1.0, 500);
             }
 
             //Drive to second beacon
@@ -188,7 +189,7 @@ public class Auto4507 extends LinearOpMode {
 
     }
 
-    public void driveStraight(double approxInches, double rangeInches, double speed, long delayMillis) throws InterruptedException {
+    public void driveStraight(double currentHeading, double approxInches, double rangeInches, double speed, long delayMillis) throws InterruptedException {
         boolean endMove = false;
         double rngInches;
         double prevRngInches = 0.0;
@@ -199,18 +200,13 @@ public class Auto4507 extends LinearOpMode {
         rightDrive.setTargetPosition(rTarget);
         leftDrive.setPower(speed);
         rightDrive.setPower(speed);
+        double error;
+
+        Log.i("gyroStraightHeading", String.valueOf(currentHeading));
 
         rngInches = range.getDistance(DistanceUnit.INCH);
         while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive() && !endMove) {
-            gyroError = gyro.getIntegratedZValue() - desiredHeading;
-//            if (gyroError > 180) {
-//                gyroError = 360 - gyroError;
-//            }
-//            if (gyroError < -180) {
-//                gyroError = 360 + gyroError;
-//            }
-//            leftDrive.setPower(Range.clip(speed - (0.06 + (gyroError * 0.03)), -1.0, 1.0));
-//            rightDrive.setPower(Range.clip(speed + (0.06 + (gyroError * 0.03)), -1.0, 1.0));
+
             if (prevRngInches != rngInches) {
                 prevRngInches = rngInches;
             }
@@ -222,6 +218,15 @@ public class Auto4507 extends LinearOpMode {
                 leftDrive.setPower(0.0);
                 rightDrive.setPower(0.0);
             }
+
+//            error = currentHeading - gyro.getIntegratedZValue();
+//            while (error > 180)  error -= 360;
+//            while (error <= -180) error += 360;
+//
+//            Log.i("Straight", String.valueOf(gyro.getIntegratedZValue()));
+//
+//            leftDrive.setPower(Range.clip(speed - (error * P_DRIVE_COEFF), -1.0, 1.0));
+//            rightDrive.setPower(Range.clip(speed + (error * P_DRIVE_COEFF), -1.0, 1.0));
             idle();
         }
         leftDrive.setPower(0.0);
@@ -229,10 +234,12 @@ public class Auto4507 extends LinearOpMode {
         sleep(delayMillis);
     }
 
-    public void driveStraight(double inches, double speed, long delayMillis) throws InterruptedException {
+    public void driveStraight(double currentHeading, double inches, double speed, long delayMillis) throws InterruptedException {
         int lTarget = leftDrive.getCurrentPosition() - (int)(-inches * (countsPerYard / 36.0));
         int rTarget = rightDrive.getCurrentPosition() - (int)(-inches * (countsPerYard / 36.0));
-        int gyroError;
+        double error;
+
+        Log.i("gyroStraightHeading", String.valueOf(currentHeading));
 
         leftDrive.setTargetPosition(lTarget);
         rightDrive.setTargetPosition(rTarget);
@@ -241,15 +248,14 @@ public class Auto4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while ((leftDrive.isBusy() && rightDrive.isBusy()) && opModeIsActive()) {
-            gyroError = gyro.getIntegratedZValue() - desiredHeading;
-//            if (gyroError > 180) {
-//                gyroError = 360 - gyroError;
-//            }
-//            if (gyroError < -180) {
-//                gyroError = 360 + gyroError;
-//            }
-            leftDrive.setPower(Range.clip(speed - (0.04 + (gyroError * 0.03)), -1.0, 1.0));
-            rightDrive.setPower(Range.clip(speed + (0.04 + (gyroError * 0.03)), -1.0, 1.0));
+//            error = currentHeading - gyro.getIntegratedZValue();
+//            while (error > 180)  error -= 360;
+//            while (error <= -180) error += 360;
+//
+//            Log.i("gyroStraight", String.valueOf(gyro.getIntegratedZValue()));
+//
+//            leftDrive.setPower(Range.clip(speed - (error * P_DRIVE_COEFF), -1.0, 1.0));
+//            rightDrive.setPower(Range.clip(speed + (error * P_DRIVE_COEFF), -1.0, 1.0));
             idle();
         }
 
