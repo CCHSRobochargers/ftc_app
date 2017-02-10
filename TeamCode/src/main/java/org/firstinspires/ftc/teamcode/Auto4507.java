@@ -76,8 +76,7 @@ public class Auto4507 extends LinearOpMode {
         beaconPusher = hardwareMap.servo.get("bPu");
         beaconPusher.setPosition(0.5);
         capBallLock = hardwareMap.servo.get("cBL");
-        capBallLock.setPosition(0.92);
-        // Sensors
+        capBallLock.setPosition(1.0);        // Sensors
         gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
         bColor = hardwareMap.colorSensor.get("cS");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
@@ -113,7 +112,7 @@ public class Auto4507 extends LinearOpMode {
 
         //Drive straight to shoot
         if (opModeIsActive()) {
-            driveStraight(currentHeading, 24, 1.0, 500);
+            driveStraight(currentHeading, 24, 1.0, 300);
         }
 
         //Shoot twice
@@ -122,48 +121,48 @@ public class Auto4507 extends LinearOpMode {
         if (beaconY) {
             //Drive Turn parallel to tape lines
             if (opModeIsActive()) {
-//                driveTurn(red ? 45 : -45, 0.75, 500);
+//                driveTurn(red ? 45 : -45, 0.75, 300);
                 currentHeading += red ? 45: -45;
                 gyroTurn(0.75, currentHeading);
             }
 
             //Drive forward
             if (opModeIsActive()) {
-                driveStraight(currentHeading, 26, 1.0, 500);
+                driveStraight(currentHeading, 26, 1.0, 300);
             }
 
             //Turn to wall
             if(opModeIsActive()) {
-//                driveTurn(red ? 45 : -45, 0.75, 500);
+//                driveTurn(red ? 45 : -45, 0.75, 300);
                 currentHeading += red ? 45: -45;
                 gyroTurn(0.75, currentHeading);
             }
 
             //Drive straight partially to wall
             if (opModeIsActive()) {
-                driveStraight(currentHeading, 16, 1.0, 500);
+                driveStraight(currentHeading, 16, 1.0, 300);
             }
 
             //Drive straight to wall with range
             if (opModeIsActive()) {
-                driveStraight(currentHeading, 8, 8, 0.4, 500);
+                driveStraight(currentHeading, 8, 8, 0.4, 300);
             }
 
             //Turn to Beacon
             if (opModeIsActive()) {
-//                driveTurn(red ? -90 : 90, 0.75, 500);
-                currentHeading += red ? -90: 90;
+//                driveTurn(red ? -90 : 90, 0.75, 300);
+                currentHeading += red ? -90: -90;
                 gyroTurn(0.75, currentHeading);
             }
 
             //Drive to first beacon
             if (opModeIsActive()) {
-                beacon(0.3, 500);
+                beacon(red ? 0.3 : -0.3, 300);
             }
 
-            //Back up to button
+////            Back up to button
 //            if (opModeIsActive()) {
-//                driveStraight(currentHeading, -2, 0.25, 500);
+//                driveStraight(currentHeading, red ? 2 : -2, 0.25, 300);
 //            }
 
             //Wind in/out beacon pusher
@@ -173,17 +172,39 @@ public class Auto4507 extends LinearOpMode {
 
             //Drive forward between beacons
             if (opModeIsActive()) {
-                driveStraight(currentHeading, 32, 1.0, 500);
+                driveStraight(currentHeading, red ? 32 : -32, 1.0, 300);
             }
 
             //Drive to second beacon
             if (opModeIsActive()) {
-                beacon(0.3, 500);
+                beacon(red ? 0.3 : -0.3, 300);
             }
 
             //Wind in/out beacon pusher
             if(opModeIsActive()) {
                 moveButtonPusher();
+            }
+        } else {
+            // Turn
+            if (opModeIsActive()) {
+                currentHeading += red ? 10 : -10;
+                gyroTurn(0.75, currentHeading);
+            }
+
+            // Drive and push cap ball
+            if (opModeIsActive()) {
+                driveStraight(currentHeading, 24, 1.0, 100);
+            }
+
+            //Turn to ramp
+            if (opModeIsActive()) {
+                currentHeading += red ? 55: -55;
+                gyroTurn(0.75, currentHeading);
+            }
+
+            //Back on ramp
+            if (opModeIsActive()) {
+                driveStraight(currentHeading, -72, 1.0, 100);
             }
         }
 
@@ -450,7 +471,7 @@ public class Auto4507 extends LinearOpMode {
 
     public void index() {
         indexer.setPosition(0.18);
-        sleep(500);
+        sleep(300);
     }
 
     public void moveButtonPusher() {
