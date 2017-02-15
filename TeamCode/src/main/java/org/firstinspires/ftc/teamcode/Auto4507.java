@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsAnalogOpticalDistanceSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -37,6 +39,11 @@ public class Auto4507 extends LinearOpMode {
     ColorSensor bColor;
     TouchSensor kickStop;
     ModernRoboticsI2cRangeSensor range;
+    ModernRoboticsI2cRangeSensor sideRange;
+    ModernRoboticsAnalogOpticalDistanceSensor redODS;
+    ModernRoboticsAnalogOpticalDistanceSensor blueODS;
+    double redODSGrayVal;
+    double blueODSGrayVal;
     //Switch Variables
     boolean red;
     boolean beaconY;
@@ -48,7 +55,7 @@ public class Auto4507 extends LinearOpMode {
     int countsPerDonut = countsPer4Donuts / 4;
     int countEndDelta = countsPerYard / 144;
     static double           HEADING_THRESHOLD       = 10.0;    // Degrees that is close enough
-    static final double     P_TURN_COEFF            = 0.025;    // Larger is more responsive, but also less stable
+    static final double     P_TURN_COEFF            = 0.02;    // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.2;     // Larger is more responsive, but also less stable
 
     @Override
@@ -80,7 +87,17 @@ public class Auto4507 extends LinearOpMode {
         gyro = (ModernRoboticsI2cGyro) hardwareMap.gyroSensor.get("gyro");
         bColor = hardwareMap.colorSensor.get("cS");
         range = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "range");
+        sideRange = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "sR");
+        sideRange.setI2cAddress(I2cAddr.create7bit(0x42));
         kickStop = hardwareMap.touchSensor.get("kT");
+        redODS = hardwareMap.get(ModernRoboticsAnalogOpticalDistanceSensor.class, "rO");
+        blueODS = hardwareMap.get(ModernRoboticsAnalogOpticalDistanceSensor.class, "bO");
+        redODS.enableLed(true);
+        blueODS.enableLed(true);
+        redODSGrayVal = redODS.readRawVoltage();
+        blueODSGrayVal = blueODS.readRawVoltage();
+        Log.i("redODSVal", String.valueOf(redODSGrayVal));
+        Log.i("blueODSVal", String .valueOf(blueODSGrayVal));
         // Calibrate Gyro
         gyro.calibrate();
         Log.i("Gyro Status:", "Is Calibrating...");
@@ -145,7 +162,7 @@ public class Auto4507 extends LinearOpMode {
 
             //Drive straight to wall with range
             if (opModeIsActive()) {
-                driveStraight(currentHeading, 8, 8, 0.4, 300);
+                driveStraight(currentHeading, 8, 10, 0.4, 300);
             }
 
             //Turn to Beacon
@@ -155,35 +172,40 @@ public class Auto4507 extends LinearOpMode {
                 gyroTurn(0.75, currentHeading);
             }
 
-            //Drive to first beacon
+            //Drive to first white line
             if (opModeIsActive()) {
-                beacon(red ? 0.3 : -0.3, 300);
+                driveToWhiteLine(red ? 0.3 : -0.3, 300);
             }
 
-////            Back up to button
+//            //Drive to first beacon
 //            if (opModeIsActive()) {
-//                driveStraight(currentHeading, red ? 2 : -2, 0.25, 300);
+//                beacon(red ? 0.3 : -0.3, 300);
 //            }
-
-            //Wind in/out beacon pusher
-            if (opModeIsActive()) {
-                moveButtonPusher();
-            }
+//
+//            //Wind in/out beacon pusher
+//            if (opModeIsActive()) {
+//                moveButtonPusher();
+//            }
 
             //Drive forward between beacons
             if (opModeIsActive()) {
                 driveStraight(currentHeading, red ? 32 : -32, 1.0, 300);
             }
 
-            //Drive to second beacon
+            //Drive to second white line
             if (opModeIsActive()) {
-                beacon(red ? 0.3 : -0.3, 300);
+                driveToWhiteLine(red ? 0.3 : -0.3, 300);
             }
 
-            //Wind in/out beacon pusher
-            if(opModeIsActive()) {
-                moveButtonPusher();
-            }
+//            //Drive to second beacon
+//            if (opModeIsActive()) {
+//                beacon(red ? 0.3 : -0.3, 300);
+//            }
+//
+//            //Wind in/out beacon pusher
+//            if(opModeIsActive()) {
+//                moveButtonPusher();
+//            }
         } else {
             // Turn
             if (opModeIsActive()) {
@@ -285,7 +307,7 @@ public class Auto4507 extends LinearOpMode {
         sleep(delayMillis);
     }
 
-    public void gyroTurn (  double speed, double angle) {
+    public void gyroTurn (double speed, double angle) {
 
         Log.i("gyroTurn angle", String.valueOf(angle));
         Log.i("gyroTurn before", String.valueOf(gyro.getIntegratedZValue()));
@@ -415,6 +437,46 @@ public class Auto4507 extends LinearOpMode {
     }
 
     public void beacon(double speed, long delay) {
+//        boolean stop = false;
+//        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+//        leftDrive.setPower(speed);
+//        rightDrive.setPower(speed);
+//
+//        while (!stop && opModeIsActive()) {
+//            int redVal = bColor.red();
+//            int blueVal = bColor.blue();
+//            if (red) {
+//                if (redVal > blueVal) {
+//                    Log.i("Stopped at red", "Yay");
+//                    leftDrive.setPower(0.0);
+//                    rightDrive.setPower(0.0);
+//                    stop = true;
+//                }
+//            } else {
+//                if (blueVal > redVal) {
+//                    Log.i("Stopped at blue", "Yay");
+//                    leftDrive.setPower(0.0);
+//                    rightDrive.setPower(0.0);
+//                    stop = true;
+//                }
+//            }
+//            telemetry.addData("BlueVal", blueVal);
+//            telemetry.addData("RedVal", redVal);
+//            updateTelemetry(telemetry);
+//            if ((redVal > 0) || (blueVal > 0)) {
+//                Log.i("RedVal", String.valueOf(redVal));
+//                Log.i("BlueVal", String.valueOf(blueVal));
+//            }
+//            idle();
+//        }
+//        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        sleep(delay);
+
+    }
+
+    public void driveToWhiteLine(double speed, long delay) {
         boolean stop = false;
         leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -422,36 +484,26 @@ public class Auto4507 extends LinearOpMode {
         rightDrive.setPower(speed);
 
         while (!stop && opModeIsActive()) {
-            int redVal = bColor.red();
-            int blueVal = bColor.blue();
             if (red) {
-                if (redVal > blueVal) {
-                    Log.i("Stopped at red", "Yay");
-                    leftDrive.setPower(0.0);
-                    rightDrive.setPower(0.0);
+                if (redODS.readRawVoltage() > (redODSGrayVal + (redODSGrayVal / 8))) {
                     stop = true;
                 }
             } else {
-                if (blueVal > redVal) {
-                    Log.i("Stopped at blue", "Yay");
-                    leftDrive.setPower(0.0);
-                    rightDrive.setPower(0.0);
+                if (blueODS.readRawVoltage() > (redODSGrayVal + (redODSGrayVal / 8))) {
                     stop = true;
                 }
             }
-            telemetry.addData("BlueVal", blueVal);
-            telemetry.addData("RedVal", redVal);
-            updateTelemetry(telemetry);
-            if ((redVal > 0) || (blueVal > 0)) {
-                Log.i("RedVal", String.valueOf(redVal));
-                Log.i("BlueVal", String.valueOf(blueVal));
-            }
+            Log.i("sideRange", String.valueOf(sideRange.getDistance(DistanceUnit.INCH)));
             idle();
         }
+
+        leftDrive.setPower(0.0);
+        rightDrive.setPower(0.0);
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         sleep(delay);
-
+        Log.i("redODS", String.valueOf(redODS.readRawVoltage()));
+        Log.i("blueODS", String.valueOf(blueODS.readRawVoltage()));
     }
 
     public void shoot(int times) {
