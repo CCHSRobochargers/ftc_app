@@ -168,24 +168,42 @@ public class Auto4507 extends LinearOpMode {
             //Turn to Beacon
             if (opModeIsActive()) {
 //                driveTurn(red ? -90 : 90, 0.75, 300);
-                currentHeading += red ? -90: -90;
+                currentHeading += red ? -86 : -86;
                 gyroTurn(0.75, currentHeading);
             }
+
+//            if (opModeIsActive()) {
+//                gyroHold(0.2, 0, 0.5);
+////                gyroFix(0, 300);
+//            }
 
             //Drive to first white line
             if (opModeIsActive()) {
                 driveToWhiteLine(red ? 0.3 : -0.3, 300);
             }
 
-//            //Drive to first beacon
+//            //Wind out beacon pusher partway
 //            if (opModeIsActive()) {
-//                beacon(red ? 0.3 : -0.3, 300);
+//                sleep(100);
+//                double rangeVal = sideRange.getDistance(DistanceUnit.INCH);
+//                rangeVal -= 3;
+//                moveButtonPusherOut((long)rangeVal * 100);
 //            }
-//
-//            //Wind in/out beacon pusher
-//            if (opModeIsActive()) {
-//                moveButtonPusher();
-//            }
+
+            //Drive to first beacon
+            if (opModeIsActive()) {
+                beacon(red ? 0.15 : -0.15, 300);
+            }
+
+            //Wind out beacon pusher
+            if (opModeIsActive()) {
+                moveButtonPusherOut(3500);
+            }
+
+            //Wind in beacon pusher
+            if (opModeIsActive()) {
+                moveButtonPusherIn(1000);
+            }
 
             //Drive forward between beacons
             if (opModeIsActive()) {
@@ -197,15 +215,20 @@ public class Auto4507 extends LinearOpMode {
                 driveToWhiteLine(red ? 0.3 : -0.3, 300);
             }
 
-//            //Drive to second beacon
-//            if (opModeIsActive()) {
-//                beacon(red ? 0.3 : -0.3, 300);
-//            }
+            //Drive to second beacon
+            if (opModeIsActive()) {
+                beacon(red ? 0.15 : -0.15, 300);
+            }
 //
-//            //Wind in/out beacon pusher
-//            if(opModeIsActive()) {
-//                moveButtonPusher();
-//            }
+            //Wind out beacon pusher
+            if(opModeIsActive()) {
+                moveButtonPusherOut(2500);
+            }
+
+            //Wind in beacon pusher
+            if (opModeIsActive()) {
+                moveButtonPusherIn(1000);
+            }
         } else {
             // Turn
             if (opModeIsActive()) {
@@ -307,6 +330,32 @@ public class Auto4507 extends LinearOpMode {
         sleep(delayMillis);
     }
 
+    public void gyroFix(int angleToGoTo, long delay) {
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        if (gyro.getIntegratedZValue() < angleToGoTo) {
+            leftDrive.setPower(0.1);
+            rightDrive.setPower(-0.1);
+        } else if (gyro.getIntegratedZValue() > angleToGoTo) {
+            leftDrive.setPower(-0.1);
+            rightDrive.setPower(0.1);
+        }
+        while (opModeIsActive() && gyro.getIntegratedZValue() != angleToGoTo +- 1 && gyro.getIntegratedZValue() != angleToGoTo) {
+            if (gyro.getIntegratedZValue() < angleToGoTo) {
+                leftDrive.setPower(-0.1);
+                rightDrive.setPower(0.1);
+            } else if (gyro.getIntegratedZValue() > angleToGoTo) {
+                leftDrive.setPower(0.1);
+                rightDrive.setPower(-0.1);
+            }
+        }
+
+        sleep(delay);
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+    }
+
     public void gyroTurn (double speed, double angle) {
 
         Log.i("gyroTurn angle", String.valueOf(angle));
@@ -322,7 +371,7 @@ public class Auto4507 extends LinearOpMode {
 
         double saveHeadingThreshold = HEADING_THRESHOLD;
         HEADING_THRESHOLD = 1;
-        gyroHold(speed, angle, 1.0);
+        gyroHold(speed, angle, 0.75);
         HEADING_THRESHOLD = saveHeadingThreshold;
         Log.i("gyroTurn held", String.valueOf(gyro.getIntegratedZValue()));
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -437,42 +486,42 @@ public class Auto4507 extends LinearOpMode {
     }
 
     public void beacon(double speed, long delay) {
-//        boolean stop = false;
-//        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-//        leftDrive.setPower(speed);
-//        rightDrive.setPower(speed);
-//
-//        while (!stop && opModeIsActive()) {
-//            int redVal = bColor.red();
-//            int blueVal = bColor.blue();
-//            if (red) {
-//                if (redVal > blueVal) {
-//                    Log.i("Stopped at red", "Yay");
-//                    leftDrive.setPower(0.0);
-//                    rightDrive.setPower(0.0);
-//                    stop = true;
-//                }
-//            } else {
-//                if (blueVal > redVal) {
-//                    Log.i("Stopped at blue", "Yay");
-//                    leftDrive.setPower(0.0);
-//                    rightDrive.setPower(0.0);
-//                    stop = true;
-//                }
-//            }
-//            telemetry.addData("BlueVal", blueVal);
-//            telemetry.addData("RedVal", redVal);
-//            updateTelemetry(telemetry);
-//            if ((redVal > 0) || (blueVal > 0)) {
-//                Log.i("RedVal", String.valueOf(redVal));
-//                Log.i("BlueVal", String.valueOf(blueVal));
-//            }
-//            idle();
-//        }
-//        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//        sleep(delay);
+        boolean stop = false;
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        leftDrive.setPower(speed);
+        rightDrive.setPower(speed);
+
+        while (!stop && opModeIsActive()) {
+            int redVal = bColor.red();
+            int blueVal = bColor.blue();
+            if (red) {
+                if (redVal > blueVal) {
+                    Log.i("Stopped at red", "Yay");
+                    leftDrive.setPower(0.0);
+                    rightDrive.setPower(0.0);
+                    stop = true;
+                }
+            } else {
+                if (blueVal > redVal) {
+                    Log.i("Stopped at blue", "Yay");
+                    leftDrive.setPower(0.0);
+                    rightDrive.setPower(0.0);
+                    stop = true;
+                }
+            }
+            telemetry.addData("BlueVal", blueVal);
+            telemetry.addData("RedVal", redVal);
+            updateTelemetry(telemetry);
+            if ((redVal > 0) || (blueVal > 0)) {
+                Log.i("RedVal", String.valueOf(redVal));
+                Log.i("BlueVal", String.valueOf(blueVal));
+            }
+            idle();
+        }
+        leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sleep(delay);
 
     }
 
@@ -485,11 +534,11 @@ public class Auto4507 extends LinearOpMode {
 
         while (!stop && opModeIsActive()) {
             if (red) {
-                if (redODS.readRawVoltage() > (redODSGrayVal + (redODSGrayVal / 8))) {
+                if (redODS.readRawVoltage() > (redODSGrayVal + (redODSGrayVal / 4))) {
                     stop = true;
                 }
             } else {
-                if (blueODS.readRawVoltage() > (redODSGrayVal + (redODSGrayVal / 8))) {
+                if (blueODS.readRawVoltage() > (redODSGrayVal + (redODSGrayVal / 4))) {
                     stop = true;
                 }
             }
@@ -526,14 +575,17 @@ public class Auto4507 extends LinearOpMode {
         sleep(300);
     }
 
-    public void moveButtonPusher() {
+    public void moveButtonPusherOut(long delay) {
         beaconPusher.setPosition(1.0);
-        sleep(3000);
+        sleep(delay);
         Log.i("Done Moving", "OUT");
+        beaconPusher.setPosition(0.5);
+    }
+
+    public void moveButtonPusherIn(long delay) {
         beaconPusher.setPosition(0.0);
         sleep(3000);
         Log.i("Done Moving", "IN");
         beaconPusher.setPosition(0.5);
-
     }
 }
