@@ -22,8 +22,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 /**
  * Created by CAD1 on 1/28/2017.
  */
-@Autonomous(name = "Auto4507", group = "4507")
-public class Auto4507 extends LinearOpMode {
+@Autonomous(name = "Automouse4507", group = "4507")
+public class Automouse4507 extends LinearOpMode {
 
     // DcMotor
     DcMotor leftDrive;
@@ -132,8 +132,8 @@ public class Auto4507 extends LinearOpMode {
             driveStraight(currentHeading, 24, 1.0, 300);
         }
 
-        //Shoot twice
-        shoot(2);
+        //Shoot once
+        shoot(1);
 
         if (beaconY) {
             //Drive Turn parallel to tape lines
@@ -579,3 +579,4 @@ public class Auto4507 extends LinearOpMode {
         beaconPusher.setPosition(0.5);
     }
 }
+
