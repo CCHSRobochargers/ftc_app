@@ -190,6 +190,9 @@ public class Automouse4507 extends LinearOpMode {
 //                moveButtonPusherOut((long)rangeVal * 100);
 //            }
 
+            if (opModeIsActive() && !red) {
+                driveStraight(currentHeading, 1.5, 0.3, 300);
+            }
             //Drive to first beacon
             if (opModeIsActive()) {
                 beacon(red ? 0.15 : -0.15, 300);
@@ -213,6 +216,10 @@ public class Automouse4507 extends LinearOpMode {
             //Drive to second white line
             if (opModeIsActive()) {
                 driveToWhiteLine(red ? 0.3 : -0.3, 300);
+            }
+
+            if (opModeIsActive() && !red) {
+                driveStraight(currentHeading, 1.5, 0.3, 300);
             }
 
             //Drive to second beacon

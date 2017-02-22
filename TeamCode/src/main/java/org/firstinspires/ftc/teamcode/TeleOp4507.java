@@ -135,7 +135,7 @@ public class TeleOp4507 extends OpMode {
         if (gamepad2.dpad_up) {
             capBallLock.setPosition(0.0);
         } else if (gamepad2.dpad_down) {
-            capBallLock.setPosition(1.0);
+            capBallLock.setPosition(0.63);
         }
 
         if (gamepad2.dpad_left) {

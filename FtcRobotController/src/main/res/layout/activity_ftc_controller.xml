@@ -157,8 +157,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         android:id="@+id/beaconDisplay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textGamepad1" />
+        android:layout_above="@+id/shootDisplay" />
 
+    <TextView
+        android:id="@+id/shootDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/tileDisplay"/>
+
+    <TextView
+        android:id="@+id/tileDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:layout_above="@+id/capballDisplay"/>
+
+    <TextView
+        android:id="@+id/capballDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:layout_above="@+id/delayDisplay"/>
+
+    <TextView
+        android:id="@+id/delayDisplay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="invisible"
+        android:layout_above="@+id/textGamepad1"/>
 
     <TextView
       android:id="@+id/textGamepad1"

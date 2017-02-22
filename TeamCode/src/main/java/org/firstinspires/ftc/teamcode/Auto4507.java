@@ -47,6 +47,9 @@ public class Auto4507 extends LinearOpMode {
     //Switch Variables
     boolean red;
     boolean beaconY;
+    boolean shoot2;
+    boolean vortexTile;
+    boolean hitCapBall;
     //Global State Variables
     int currentHeading;
     int desiredHeading;
@@ -65,6 +68,9 @@ public class Auto4507 extends LinearOpMode {
         Log.i("Red?", String.valueOf(AutoConfig.redAlliance));
         beaconY = AutoConfig.doBeacon;
         Log.i("Beacon?", String.valueOf(AutoConfig.doBeacon));
+        shoot2 = AutoConfig.shootTwo;
+        vortexTile = AutoConfig.vortexTile;
+        hitCapBall = AutoConfig.hitCapBall;
         //DcMotors
         leftDrive = hardwareMap.dcMotor.get("l");
         leftDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -121,6 +127,10 @@ public class Auto4507 extends LinearOpMode {
         desiredHeading = gyro.getIntegratedZValue();
         Log.i("Gyro Status", "Current Heading is: " + String.valueOf(currentHeading));
 
+        if (!beaconY) {
+            sleep(1000 * AutoConfig.delay);
+        }
+
         //Turn on sweeper
         sweeper.setPower(-1.0);
 
@@ -129,11 +139,17 @@ public class Auto4507 extends LinearOpMode {
 
         //Drive straight to shoot
         if (opModeIsActive()) {
-            driveStraight(currentHeading, 24, 1.0, 300);
+            if (!beaconY && !vortexTile) {
+                driveStraight(currentHeading, 42, 1.0, 300);
+            } else {
+                driveStraight(currentHeading, 24, 1.0, 300);
+            }
         }
 
         //Shoot twice
-        shoot(2);
+        shoot(shoot2 ? 2 : 1);
+
+        sweeper.setPower(0.0);
 
         if (beaconY) {
             //Drive Turn parallel to tape lines
@@ -230,16 +246,36 @@ public class Auto4507 extends LinearOpMode {
                 moveButtonPusherIn(1000);
             }
         } else {
-            // Turn
-            if (opModeIsActive()) {
-                currentHeading += red ? 10 : -10;
-                gyroTurn(0.75, currentHeading);
+            if (vortexTile) {
+                if (hitCapBall) {
+                    // Turn
+                    if (opModeIsActive()) {
+                        currentHeading += red ? 10 : -10;
+                        gyroTurn(0.75, currentHeading);
+                    }
+
+                    // Drive and push cap ball and park
+                    if (opModeIsActive()) {
+                        driveStraight(currentHeading, 36, 1.0, 100);
+                    }
+                } else {
+                    //Backup
+                    if (opModeIsActive()) {
+                        driveStraight(currentHeading, -24, 1.0, 300);
+                    }
+                }
+            } else {
+                if (hitCapBall) {
+                    if (opModeIsActive()) {
+                        driveStraight(currentHeading, 24, 1.0, 300);
+                    }
+                } else {
+                    if (opModeIsActive()) {
+                        driveStraight(currentHeading, -42, 1.0, 300);
+                    }
+                }
             }
 
-            // Drive and push cap ball
-            if (opModeIsActive()) {
-                driveStraight(currentHeading, 36, 1.0, 100);
-            }
         }
 
     }
@@ -420,6 +456,8 @@ public class Auto4507 extends LinearOpMode {
         // Stop all motion;
         leftDrive.setPower(0);
         rightDrive.setPower(0);
+
+        sleep(100);
     }
 
 //    public void driveTurn(int degrees, double speed, long delayMillis) throws InterruptedException {

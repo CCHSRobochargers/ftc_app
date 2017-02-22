@@ -50,6 +50,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <string name="about_menu_item">About</string>
   <string name="allycolor_menu_item">Change Alliance Color</string>
   <string name="beaconyn_menu_item">Get Beacons</string>
+  <string name="shootnum_menu_item"># of Balls to Shoot</string>
+  <string name="tile_menu_item">Start Tile</string>
+  <string name="capball_menu_item">Hit Cap Ball</string>
   <string name="switches">Digital Switch</string>
   <string name="exit_menu_item">Exit</string>
 
@@ -72,4 +75,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   <string name="switchBack">BACK</string>
   <string name="redName">Red</string>
   <string name="blueName">Blue</string>
+  <string name="name1ball">1</string>
+  <string name="name2ball">2</string>
+  <string name="cornerName">Corner Tile</string>
+  <string name="vortexName">Vortex Tile</string>
 </resources>

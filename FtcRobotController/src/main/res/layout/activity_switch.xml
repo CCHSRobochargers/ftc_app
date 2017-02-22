@@ -28,7 +28,6 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
         <ToggleButton
             android:id="@+id/rBToggle"
             android:layout_width="100dp"
@@ -41,7 +40,7 @@
             android:id="@+id/rbText"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:text="@string/allycolor_menu_item"
             android:textSize="15sp"/>
         <ToggleButton
@@ -54,12 +53,65 @@
             android:id="@+id/bYNText"
             android:layout_width="wrap_content"
             android:layout_height="50dp"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:layout_below="@+id/rbText"
             android:text="@string/beaconyn_menu_item"
             android:textSize="15sp"/>
-
+        <ToggleButton
+            android:id="@+id/shootNumberToggle"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:textOn="@string/name2ball"
+            android:textOff="@string/name1ball"
+            android:layout_below="@id/bYNToggle"
+            android:onClick="shootNumberButton" />
+        <TextView
+            android:id="@+id/shootText"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/bYNText"
+            android:text="@string/shootnum_menu_item"
+            android:textSize="15sp"/>
+        <ToggleButton
+            android:id="@+id/tileToggle"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:textOn="@string/vortexName"
+            android:textOff="@string/cornerName"
+            android:visibility="invisible"
+            android:layout_below="@id/shootNumberToggle"
+            android:onClick="tileButton" />
+        <TextView
+            android:id="@+id/tileText"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/shootText"
+            android:visibility="invisible"
+            android:text="@string/tile_menu_item"
+            android:textSize="15sp"/>
+        <ToggleButton
+            android:id="@+id/capballToggle"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:layout_below="@id/tileToggle"
+            android:visibility="invisible"
+            android:onClick="capballButton" />
+        <TextView
+            android:id="@+id/capballText"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/tileText"
+            android:visibility="invisible"
+            android:text="@string/capball_menu_item"
+            android:textSize="15sp"/>
+        <SeekBar
+            android:id="@+id/delay"
+            android:layout_below="@id/capballText"
+            android:visibility="invisible"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
     </RelativeLayout>
-
-
 </LinearLayout>

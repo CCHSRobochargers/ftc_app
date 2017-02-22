@@ -126,7 +126,6 @@ public class FtcRobotControllerActivity extends Activity {
   protected TextView textNetworkConnectionStatus;
   protected TextView textRobotStatus;
   protected TextView[] textGamepad = new TextView[NUM_GAMEPADS];
-  protected TextView textbeaconYN;
   protected TextView textOpMode;
   protected TextView textErrorMessage;
   protected ImmersiveMode immersion;
@@ -297,8 +296,25 @@ public class FtcRobotControllerActivity extends Activity {
 
     TextView colorView = (TextView) findViewById(R.id.colorDisplay);
     TextView beaconView = (TextView) findViewById(R.id.beaconDisplay);
+    TextView shootView = (TextView) findViewById(R.id.shootDisplay);
+    TextView tileView = (TextView) findViewById(R.id.tileDisplay);
+    TextView capballView = (TextView) findViewById(R.id.capballDisplay);
+    TextView delayView = (TextView) findViewById(R.id.delayDisplay);
     colorView.setText(AutoConfig.redAlliance ? R.string.red : R.string.blue);
     beaconView.setText(AutoConfig.doBeacon ? R.string.beaconY : R.string.beaconN);
+    shootView.setText(AutoConfig.shootTwo ? "Robot will shoot: 2 Particles" : "Robot will shoot: 1 Particle");
+    if (!AutoConfig.doBeacon) {
+      tileView.setVisibility(View.VISIBLE);
+      capballView.setVisibility(View.VISIBLE);
+      delayView.setVisibility(View.VISIBLE);
+      tileView.setText(AutoConfig.vortexTile ? "Robot must start on: Tile by corner vortex" : "Robot must start on: Tile by center line");
+      capballView.setText(AutoConfig.hitCapBall ? "Robot will now: Hit the capball" : "Robot will now: Back up without hitting capball");
+      delayView.setText("Robot will delay " + String.valueOf(AutoConfig.delay) + " seconds");
+    } else {
+      tileView.setVisibility(View.INVISIBLE);
+      capballView.setVisibility(View.INVISIBLE);
+      delayView.setVisibility(View.INVISIBLE);
+    }
 
     cfgFileMgr.getActiveConfigAndUpdateUI();
 
