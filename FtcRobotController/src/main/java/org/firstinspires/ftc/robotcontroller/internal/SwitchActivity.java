@@ -42,7 +42,7 @@ public class SwitchActivity extends Activity {
         tileToggle.setChecked(AutoConfig.vortexTile);
         cbToggle.setChecked(AutoConfig.hitCapBall);
         delay = (SeekBar) findViewById(R.id.delay);
-        delay.setMax(10);
+        delay.setMax(20);
         delay.setProgress(AutoConfig.delay);
         if (AutoConfig.doBeacon) {
             cbToggle.setVisibility(View.INVISIBLE);

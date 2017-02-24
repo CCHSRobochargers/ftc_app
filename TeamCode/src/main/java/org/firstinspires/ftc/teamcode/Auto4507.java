@@ -57,8 +57,8 @@ public class Auto4507 extends LinearOpMode {
     int countsPer4Donuts = 18186;
     int countsPerDonut = countsPer4Donuts / 4;
     int countEndDelta = countsPerYard / 144;
-    static double           HEADING_THRESHOLD       = 10.0;    // Degrees that is close enough
-    static final double     P_TURN_COEFF            = 0.02;    // Larger is more responsive, but also less stable
+    static double           HEADING_THRESHOLD       = 3.0;    // Degrees that is close enough
+    static final double     P_TURN_COEFF            = 0.05;          //0.02;    // Larger is more responsive, but also less stable
     static final double     P_DRIVE_COEFF           = 0.2;     // Larger is more responsive, but also less stable
 
     @Override
@@ -156,19 +156,19 @@ public class Auto4507 extends LinearOpMode {
             if (opModeIsActive()) {
 //                driveTurn(red ? 45 : -45, 0.75, 300);
                 currentHeading += red ? 45: -45;
-                gyroTurn(0.75, currentHeading);
+                gyroTurn(0.25, currentHeading);
             }
 
             //Drive forward
             if (opModeIsActive()) {
-                driveStraight(currentHeading, 26, 1.0, 300);
+                driveStraight(currentHeading, 23, 1.0, 300);
             }
 
             //Turn to wall
             if(opModeIsActive()) {
 //                driveTurn(red ? 45 : -45, 0.75, 300);
                 currentHeading += red ? 45: -45;
-                gyroTurn(0.75, currentHeading);
+                gyroTurn(0.25, currentHeading);
             }
 
             //Drive straight partially to wall
@@ -178,14 +178,14 @@ public class Auto4507 extends LinearOpMode {
 
             //Drive straight to wall with range
             if (opModeIsActive()) {
-                driveStraight(currentHeading, 8, 10, 0.4, 300);
+                driveStraight(currentHeading, 12, 10, 0.4, 300);
             }
 
             //Turn to Beacon
             if (opModeIsActive()) {
 //                driveTurn(red ? -90 : 90, 0.75, 300);
-                currentHeading += red ? -86 : -86;
-                gyroTurn(0.75, currentHeading);
+                currentHeading += red ? -90 : 90;
+                gyroTurn(0.20, currentHeading);
             }
 
 //            if (opModeIsActive()) {
@@ -198,13 +198,9 @@ public class Auto4507 extends LinearOpMode {
                 driveToWhiteLine(red ? 0.3 : -0.3, 300);
             }
 
-//            //Wind out beacon pusher partway
-//            if (opModeIsActive()) {
-//                sleep(100);
-//                double rangeVal = sideRange.getDistance(DistanceUnit.INCH);
-//                rangeVal -= 3;
-//                moveButtonPusherOut((long)rangeVal * 100);
-//            }
+            if (opModeIsActive() && !red) {
+                driveStraight(currentHeading, -3, 0.25, 200);
+            }
 
             //Drive to first beacon
             if (opModeIsActive()) {
@@ -229,6 +225,10 @@ public class Auto4507 extends LinearOpMode {
             //Drive to second white line
             if (opModeIsActive()) {
                 driveToWhiteLine(red ? 0.3 : -0.3, 300);
+            }
+
+            if (opModeIsActive() && !red) {
+                driveStraight(currentHeading, -3, 0.25, 200);
             }
 
             //Drive to second beacon
@@ -387,8 +387,8 @@ public class Auto4507 extends LinearOpMode {
         Log.i("gyroTurn angle", String.valueOf(angle));
         Log.i("gyroTurn before", String.valueOf(gyro.getIntegratedZValue()));
         // keep looping while we are still active, and not on heading.
-        leftDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightDrive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         while (opModeIsActive() && !onHeading(speed, angle, P_TURN_COEFF)) {
             // Update telemetry & Allow time for other processes to run.
             telemetry.update();
@@ -457,7 +457,7 @@ public class Auto4507 extends LinearOpMode {
         leftDrive.setPower(0);
         rightDrive.setPower(0);
 
-        sleep(100);
+        sleep(250);
     }
 
 //    public void driveTurn(int degrees, double speed, long delayMillis) throws InterruptedException {
