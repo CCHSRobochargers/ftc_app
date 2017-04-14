@@ -184,7 +184,7 @@ public class Auto4507 extends LinearOpMode {
             //Turn to Beacon
             if (opModeIsActive()) {
 //                driveTurn(red ? -90 : 90, 0.75, 300);
-                currentHeading += red ? -90 : 90;
+                currentHeading += - 90;
                 gyroTurn(0.20, currentHeading);
             }
 
