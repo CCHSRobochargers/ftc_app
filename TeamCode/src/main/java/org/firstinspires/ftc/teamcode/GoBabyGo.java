@@ -67,7 +67,7 @@ public class GoBabyGo extends OpMode {
                 override = true;
             }
             speed = Range.scale(yAxis.getVoltage() / yMax, 0.0, 1.0, -1.0, 1.0);
-            speed *= -1;
+            speed *= -1.0;
             steer = Range.scale(xAxis.getVoltage() / xMax, 0.0, 1.0, -1.0, 1.0);
             AppUtil.getInstance().showToast(("Henry's in control" + '\n' + "Touch the joysticks to override his control"), hardwareMap.appContext, Toast.LENGTH_SHORT);
         }
@@ -85,8 +85,6 @@ public class GoBabyGo extends OpMode {
 
         monitor.setPower(speed);
         this.steer.setPower(steer);
-
-
     }
 
     public void stop() {
