@@ -32,6 +32,9 @@ public class GoBabyGo extends OpMode {
     boolean active = false;
     boolean override = false;
 
+    private double speedLimit = 0.5;
+    private double steerMax = 0.3;
+
     public void init() {
         leftDrive = hardwareMap.dcMotor.get("lD");
         rightDrive = hardwareMap.dcMotor.get("rD");
@@ -56,7 +59,7 @@ public class GoBabyGo extends OpMode {
         double steer;
         if (override) {
             speed = -gamepad1.right_stick_y;
-            steer = gamepad1.right_stick_x;
+            steer = -gamepad1.right_stick_x;
             AppUtil.getInstance().showToast(("User Override!" + '\n' + "Press " + '\'' + 'a' + '\'' + " to give control back to Henry"), hardwareMap.appContext, Toast.LENGTH_SHORT);
 
             if (gamepad1.a) {
@@ -66,21 +69,20 @@ public class GoBabyGo extends OpMode {
             if (!gamepad1.atRest()) {
                 override = true;
             }
-            speed = Range.scale(yAxis.getVoltage() / yMax, 0.0, 1.0, -1.0, 1.0);
-            speed *= -1.0;
-            steer = Range.scale(xAxis.getVoltage() / xMax, 0.0, 1.0, -1.0, 1.0);
+            speed = Range.scale(xAxis.getVoltage() / xMax, 1.0, 0.0, speedLimit, -speedLimit);
+            steer = Range.scale(yAxis.getVoltage() / yMax, 0.0, 1.0, -steerMax, steerMax);
             AppUtil.getInstance().showToast(("Henry's in control" + '\n' + "Touch the joysticks to override his control"), hardwareMap.appContext, Toast.LENGTH_SHORT);
         }
 
-        speed = Range.clip(speed, -1.0, 1.0);
+        speed = Range.clip(speed, -speedLimit, speedLimit);
         if (rightSteerStop.isPressed()) {
-            steer = Range.clip(steer, -1.0, 0.0);
+            steer = Range.clip(steer, -steerMax, 0.0);
         } else if (leftSteerStop.isPressed()) {
-            steer = Range.clip(steer, 0.0, 1.0);
+            steer = Range.clip(steer, 0.0, steerMax);
         } else if (leftSteerStop.isPressed() && rightSteerStop.isPressed()) {
             steer = 0.0;
         } else {
-            steer = Range.clip(steer, -1.0, 1.0);
+            steer = Range.clip(steer, -steerMax, steerMax);
         }
 
         monitor.setPower(speed);
