@@ -10,6 +10,7 @@ import android.util.Log;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -30,7 +31,7 @@ import java.util.Arrays;
  */
 
 @Autonomous(name="Autonomous", group="4507")  // @TeleOp(...) is the other common choice
-//@Disabled
+@Disabled
 public class Autonomous4507 extends LinearOpMode {
 
     // DcMotor

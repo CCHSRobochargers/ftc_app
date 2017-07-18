@@ -30,12 +30,17 @@ public class GoBabyGo extends OpMode {
     SpeedMonitor monitor;
 
     boolean active = false;
-    boolean override = false;
+    boolean override = true;
 
-    private double speedLimit = 0.5;
+    private double speedLimit = 0.8;
     private double steerMax = 0.3;
 
+    private boolean henryToasted = false;
+    private boolean overrideToasted = false;
+
     public void init() {
+        AppUtil.getInstance().showToast(("Press \"Start\" + \"A\" to activate."), hardwareMap.appContext, Toast.LENGTH_SHORT);
+
         leftDrive = hardwareMap.dcMotor.get("lD");
         rightDrive = hardwareMap.dcMotor.get("rD");
         rightDrive.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -60,18 +65,28 @@ public class GoBabyGo extends OpMode {
         if (override) {
             speed = -gamepad1.right_stick_y;
             steer = -gamepad1.right_stick_x;
-            AppUtil.getInstance().showToast(("User Override!" + '\n' + "Press " + '\'' + 'a' + '\'' + " to give control back to Henry"), hardwareMap.appContext, Toast.LENGTH_SHORT);
+
+            if (!overrideToasted) {
+                AppUtil.getInstance().showToast(("User Override!\nPress \"A\" to give control to Henry"), hardwareMap.appContext, Toast.LENGTH_SHORT);
+                overrideToasted = true;
+                henryToasted = false;
+            }
 
             if (gamepad1.a) {
                 override = false;
             }
         } else {
-            if (!gamepad1.atRest()) {
-                override = true;
-            }
             speed = Range.scale(xAxis.getVoltage() / xMax, 1.0, 0.0, speedLimit, -speedLimit);
             steer = Range.scale(yAxis.getVoltage() / yMax, 0.0, 1.0, -steerMax, steerMax);
-            AppUtil.getInstance().showToast(("Henry's in control" + '\n' + "Touch the joysticks to override his control"), hardwareMap.appContext, Toast.LENGTH_SHORT);
+            if (!henryToasted) {
+                AppUtil.getInstance().showToast(("Henry's in control!\nPress \"B\" to take control"), hardwareMap.appContext, Toast.LENGTH_SHORT);
+                henryToasted = true;
+                overrideToasted = false;
+            }
+
+            if (gamepad1.b) {
+                override = true;
+            }
         }
 
         speed = Range.clip(speed, -speedLimit, speedLimit);

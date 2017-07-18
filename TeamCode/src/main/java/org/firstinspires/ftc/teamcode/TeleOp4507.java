@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.util.Range;
 import java.util.Iterator;
 
 @TeleOp(name="Teleop", group="4507")
-//@Disabled
+@Disabled
 public class TeleOp4507 extends OpMode {
     enum Kick {DELAYSTART, DELAYEND, KICKSTART, KICKEND, IDLE}
     enum Index {DELAYSTART, DELAYEND, INDEXSTART, INDEXEND, IDLE}

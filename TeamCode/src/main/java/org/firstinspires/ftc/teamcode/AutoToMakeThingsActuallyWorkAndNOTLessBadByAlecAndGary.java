@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
  * Created by Robotics on 10/13/2016.
  */
 @Autonomous(name = "FixAutonomous", group = "4507")
-//@Disabled
+@Disabled
 public class AutoToMakeThingsActuallyWorkAndNOTLessBadByAlecAndGary extends LinearOpMode {
 
     DcMotor lD;

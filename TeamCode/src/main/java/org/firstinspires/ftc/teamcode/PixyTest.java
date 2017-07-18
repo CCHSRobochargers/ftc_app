@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.I2cAddr;
@@ -18,7 +19,7 @@ import java.util.concurrent.locks.Lock;
  * Created by CAD1 on 12/8/2016.
  */
 @Autonomous(name = "pixytest", group = "4507")
-
+@Disabled
 public class PixyTest extends LinearOpMode {
 
     I2cDevice pixy;

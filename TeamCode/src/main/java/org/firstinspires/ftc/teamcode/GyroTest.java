@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.I2cAddr;
 import com.qualcomm.robotcore.hardware.I2cDevice;
@@ -12,6 +13,7 @@ import com.qualcomm.robotcore.hardware.I2cDeviceSynchImpl ;
  * using I2cDeviceSynch calls in the new FTC app beta.
  */
 @Autonomous(name="gyrotest", group="4507")
+@Disabled
 public class GyroTest extends OpMode {
     int heading = 0; //Variable for Heading data
     int intZValue = 0; //Variable for the integrated Z value

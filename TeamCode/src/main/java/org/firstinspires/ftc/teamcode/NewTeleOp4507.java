@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -14,6 +15,7 @@ import com.qualcomm.robotcore.util.Range;
  * Created by CAD1 on 1/3/2017.
  */
 @TeleOp(name = "TeleOp2", group = "4507")
+@Disabled
 public class NewTeleOp4507 extends LinearOpMode {
 
     enum Kick {DELAYSTART, DELAYEND, KICKSTART, KICKEND, IDLE}
